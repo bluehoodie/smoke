@@ -7,7 +7,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/bluehoodie/smoke/test"
+	"github.com/bluehoodie/smoke/tester"
 	"github.com/jessevdk/go-flags"
 )
 
@@ -33,7 +33,7 @@ func main() {
 		os.Exit(2)
 	}
 
-	t := &test.Test{}
+	t := &tester.Test{}
 	err = json.Unmarshal(data, t)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "could not unmarshal test data: %v\n", err)
@@ -45,7 +45,7 @@ func main() {
 		url = fmt.Sprintf("%s:%d", url, opts.Port)
 	}
 
-	ok := test.NewRunner(url, *t, test.WithVerboseModeOn(opts.Verbose)).Run()
+	ok := tester.NewRunner(url, *t, tester.WithVerboseModeOn(opts.Verbose)).Run()
 	if !ok {
 		os.Exit(1)
 	}
