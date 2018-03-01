@@ -1,6 +1,7 @@
 # Smoke
 
 [![Build Status](https://travis-ci.org/bluehoodie/smoke.svg?branch=master)](https://travis-ci.org/bluehoodie/smoke)
+[![Go Report Card](https://goreportcard.com/badge/github.com/bluehoodie/smoke)](https://goreportcard.com/report/github.com/bluehoodie/smoke)
 
 A simple application to write and run smoke tests for RESTful APIs.
 
