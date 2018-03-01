@@ -45,7 +45,7 @@ func main() {
 		url = fmt.Sprintf("%s:%d", url, opts.Port)
 	}
 
-	ok := test.NewRunner(url, *t, test.WithVerboseMode(opts.Verbose)).Run()
+	ok := test.NewRunner(url, *t, test.WithVerboseModeOn(opts.Verbose)).Run()
 	if !ok {
 		os.Exit(1)
 	}

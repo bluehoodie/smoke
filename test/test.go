@@ -65,11 +65,11 @@ type Runner struct {
 
 type Option func(*Runner)
 
-func WithVerboseMode(verboseMode bool) Option {
+func WithVerboseModeOn(verboseMode bool) Option {
 	return func(r *Runner) {
-		if !verboseMode {
-			r.successOutput = ioutil.Discard
-			r.failureOutput = os.Stderr
+		if verboseMode {
+			r.successOutput = os.Stdout
+			r.failureOutput = os.Stdout
 		}
 	}
 }
@@ -84,8 +84,8 @@ func NewRunner(url string, test Test, opts ...Option) *Runner {
 		test: test,
 
 		client:        client,
-		successOutput: os.Stdout,
-		failureOutput: os.Stdout,
+		successOutput: ioutil.Discard,
+		failureOutput: os.Stderr,
 	}
 
 	for _, opt := range opts {
