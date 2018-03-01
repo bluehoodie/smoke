@@ -5,5 +5,7 @@ env:
   - "PATH=$HOME/gopath/bin:$PATH"
 before_install:
   - go get github.com/bluehoodie/smoke
+before_script:
+  - go vet ./...
 script:
   - smoke -f ${HOME}/gopath/src/github.com/bluehoodie/smoke/smoke_test.json -u http://httpbin.org -v
