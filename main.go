@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"os"
 
 	"github.com/bluehoodie/smoke/tester"
@@ -21,7 +20,6 @@ var opts struct {
 func init() {
 	_, err := flags.Parse(&opts)
 	if err != nil {
-		log.Fatalln(err)
 		os.Exit(2)
 	}
 }
