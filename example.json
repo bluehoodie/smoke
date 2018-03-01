@@ -1,0 +1,81 @@
+{
+  "variables": {
+    "token": "token123"
+  },
+  "cases": [
+    {
+      "name": "httpbin_200",
+      "path": "/status/200",
+      "method": "GET",
+
+      "http_code_is": 200
+    },
+    {
+      "name": "httpbin_403",
+      "path": "/status/403",
+      "method": "GET",
+
+      "http_code_is": 403
+    },
+    {
+      "name": "httpbin_get_body",
+      "path": "/get?foo=hello!",
+      "method": "GET",
+
+      "http_code_is": 200,
+      "response_body_contains": "hello"
+    },
+    {
+      "name": "httpbin_get_body_with_variable",
+      "path": "/get?foo=::token::&bar=1",
+      "method": "GET",
+
+      "http_code_is": 200,
+      "response_body_contains": "token123"
+    },
+    {
+      "name": "httpbin_get_body_with_test_variable",
+      "path": "/get?foo=::token::&bar=1",
+      "method": "GET",
+      "variables": {"token": "token456"},
+
+      "http_code_is": 200,
+      "response_body_contains": "token456"
+    },
+    {
+      "name": "httpbin_post_body",
+      "path": "/post",
+      "method": "POST",
+      "body": "hello!",
+
+      "http_code_is": 200,
+      "response_body_contains": "hello"
+    },
+    {
+      "name": "httpbin_post_body_with_variable",
+      "path": "/post",
+      "method": "POST",
+      "body": "this is a test ::token::",
+
+      "http_code_is": 200,
+      "response_body_contains": "token123"
+    },
+    {
+      "name": "httpbin_headers",
+      "path": "/headers",
+      "method": "GET",
+      "headers": {"test_header": "test_value"},
+
+      "http_code_is": 200,
+      "response_body_contains": "test_value"
+    },
+    {
+      "name": "httpbin_headers_with_variable",
+      "path": "/headers",
+      "method": "GET",
+      "headers": {"test_header": "::token::"},
+
+      "http_code_is": 200,
+      "response_body_contains": "token123"
+    }]
+}
