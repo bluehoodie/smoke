@@ -1,5 +1,7 @@
 # Smoke
 
+[![Build Status](https://travis-ci.org/bluehoodie/smoke.svg?branch=master)](https://travis-ci.org/bluehoodie/smoke)
+
 A simple application to write and run smoke tests for RESTful APIs.
 
 ## Getting Started
