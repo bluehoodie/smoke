@@ -1,0 +1,9 @@
+language: go
+go:
+  - "1.10"
+env:
+  - "PATH=$HOME/gopath/bin:$PATH"
+before_install:
+  - go get github.com/bluehoodie/smoke
+script:
+  - smoke -f ${HOME}/gopath/src/github.com/bluehoodie/smoke/smoke_test.json -u http://httpbin.org -v
