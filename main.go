@@ -2,35 +2,32 @@ package main
 
 import (
 	"encoding/json"
-	"flag"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 
 	"github.com/bluehoodie/smoke/test"
+	"github.com/jessevdk/go-flags"
 )
 
-var (
-	file        *string
-	url         *string
-	verboseMode *bool
-)
+var opts struct {
+	Verbose bool   `short:"v" long:"verbose" description:"print out full report including successful results"`
+	File    string `short:"f" long:"file" default:"./smoke_test.json" description:"file containing the test definition"`
+	Url     string `short:"u" long:"url" default:"http://localhost" description:"url endpoint to test"`
+	Port    int    `short:"p" long:"port" description:"port the service is running on"`
+}
 
 func init() {
-	file = flag.String("file", "", "file containing the test definition (required)")
-	url = flag.String("url", "", "url endpoint to test (required)")
-	verboseMode = flag.Bool("v", false, "verbose mode will print out full report including successful results (optional. default: false)")
-
-	flag.Parse()
-
-	if *file == "" || *url == "" {
-		flag.Usage()
+	_, err := flags.Parse(&opts)
+	if err != nil {
+		log.Fatalln(err)
 		os.Exit(2)
 	}
 }
 
 func main() {
-	data, err := ioutil.ReadFile(*file)
+	data, err := ioutil.ReadFile(opts.File)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "could not read test file: %v\n", err)
 		os.Exit(2)
@@ -43,7 +40,12 @@ func main() {
 		os.Exit(2)
 	}
 
-	ok := test.NewRunner(*url, *t, test.WithVerboseMode(*verboseMode)).Run()
+	url := opts.Url
+	if opts.Port != 0 {
+		url = fmt.Sprintf("%s:%d", url, opts.Port)
+	}
+
+	ok := test.NewRunner(url, *t, test.WithVerboseMode(opts.Verbose)).Run()
 	if !ok {
 		os.Exit(1)
 	}
