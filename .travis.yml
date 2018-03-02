@@ -14,7 +14,8 @@ before_script:
   - go vet ./...
 script:
   - smoke -f ${APPPATH}/smoke_test.json -u http://localhost -p 8000 -v
+  - docker login -u="$DOCKERHUB_LOGIN" -p="$DOCKERHUB_PASSWORD"
+  - cd ${APPPATH}
+  - make publish
 after_script:
   - docker stop httpbin
-  - docker login -u="$DOCKERHUB_LOGIN" -p="$DOCKERHUB_PASSWORD"
-  - docker push bluehoodie/httpbin
