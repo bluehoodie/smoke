@@ -1,11 +1,20 @@
+sudo: required
 language: go
+services:
+  - docker
 go:
   - "1.10"
 env:
   - "PATH=$HOME/gopath/bin:$PATH"
+  - "APPPATH=$HOME/gopath/src/github.com/bluehoodie/smoke/"
 before_install:
   - go get github.com/bluehoodie/smoke
+  - docker build -t httpbin -f Dockerfile-httpbin ${APPPATH}
+  - docker run -d -p 8000:8000 --name httpbin httpbin
 before_script:
   - go vet ./...
 script:
-  - smoke -f ${HOME}/gopath/src/github.com/bluehoodie/smoke/smoke_test.json -u http://httpbin.org -v
+  - smoke -f ${APPPATH}/smoke_test.json -u http://localhost -p 8000 -v
+after_script:
+  - docker stop httpbin
+  - docker rm httpbin

@@ -1,0 +1,7 @@
+FROM python
+
+RUN pip install httpbin
+
+EXPOSE 8000
+
+ENTRYPOINT ["gunicorn", "-b", ":8000", "httpbin:app"]
