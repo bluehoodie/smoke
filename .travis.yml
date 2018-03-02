@@ -5,8 +5,7 @@ services:
 go:
   - "1.10"
 env:
-  - "PATH=$HOME/gopath/bin:$PATH"
-  - "APPPATH=$HOME/gopath/src/github.com/bluehoodie/smoke/"
+  - PATH=$HOME/gopath/bin:$PATH APPPATH=$HOME/gopath/src/github.com/bluehoodie/smoke/
 before_install:
   - go get github.com/bluehoodie/smoke
   - docker build -t httpbin -f Dockerfile-httpbin ${APPPATH}
