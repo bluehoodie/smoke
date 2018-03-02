@@ -15,8 +15,7 @@ before_script:
 script:
   - smoke -f ${APPPATH}/smoke_test.json -u http://localhost -p 8000 -v
   - cd ${APPPATH}
-  - echo $TRAVIS_PULL_REQUEST
-  - echo $TRAVIS_BRANCH
+  - if [[ $TRAVIS_PULL_REQUEST == "false" ]] && [[ $TRAVIS_BRANCH == "master" ]]; then docker login -u="$DOCKERHUB_LOGIN" -p="$DOCKERHUB_PASSWORD"; fi
   - if [[ $TRAVIS_PULL_REQUEST == "false" ]] && [[ $TRAVIS_BRANCH == "master" ]]; then make publish; fi
 after_script:
   - docker stop httpbin
