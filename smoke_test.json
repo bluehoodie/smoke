@@ -43,6 +43,14 @@
       "response_body_contains": "token456"
     },
     {
+      "name": "httpbin_get_body_with_environment_variable",
+      "path": "/get?foo=::envtoken::&bar=1",
+      "method": "GET",
+
+      "http_code_is": 200,
+      "response_body_contains": "token235"
+    },
+    {
       "name": "httpbin_post_body",
       "path": "/post",
       "method": "POST",
