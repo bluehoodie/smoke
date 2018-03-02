@@ -8,8 +8,8 @@ env:
   - PATH=$HOME/gopath/bin:$PATH APPPATH=$HOME/gopath/src/github.com/bluehoodie/smoke/
 before_install:
   - go get github.com/bluehoodie/smoke
-  - docker build -t httpbin -f Dockerfile-httpbin ${APPPATH}
-  - docker run -d -p 8000:8000 --name httpbin httpbin
+  - docker pull bluehoodie/httpbin
+  - docker run -d -p 8000:8000 --name httpbin bluehoodie/httpbin
 before_script:
   - go vet ./...
 script:
