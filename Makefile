@@ -16,5 +16,5 @@ publish: container
 httpbin-container:
 	docker build -t bluehoodie/httpbin -f Dockerfile-httpbin .
 
-httpbin-publish: test-container
+httpbin-publish: httpbin-container
 	docker push bluehoodie/httpbin
