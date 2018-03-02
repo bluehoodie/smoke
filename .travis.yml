@@ -9,13 +9,12 @@ env:
 before_install:
   - go get github.com/bluehoodie/smoke
   - docker pull bluehoodie/httpbin
-  - docker run -d -p 8000:8000 --name httpbin bluehoodie/httpbin
+  - docker run -d -p 8000:8000 --rm --name httpbin bluehoodie/httpbin
 before_script:
   - go vet ./...
   - docker login -u="$DOCKERHUB_LOGIN" -p="$DOCKERHUB_PASSWORD"
 script:
   - smoke -f ${APPPATH}/smoke_test.json -u http://localhost -p 8000 -v
-after_script:
   - docker stop httpbin
-  - docker rm httpbin
+after_script:
   - docker push bluehoodie/httpbin
