@@ -1,4 +1,4 @@
-.PHONY: install build container publish test-container test-publish
+.PHONY: install build container publish httpbin-container httpbin-publish
 
 install:
 	go build -o ${GOPATH}/bin/smoke main.go
@@ -13,8 +13,8 @@ container: build
 publish: container
 	docker push bluehoodie/smoke
 
-test-container:
+httpbin-container:
 	docker build -t bluehoodie/httpbin -f Dockerfile-httpbin .
 
-test-publish: test-container
+httpbin-publish: test-container
 	docker push bluehoodie/httpbin
