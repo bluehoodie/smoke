@@ -15,6 +15,6 @@ before_script:
   - go vet ./...
 script:
   - smoke -f ${APPPATH}/smoke_test.json -u http://localhost -p 8000 -v
-  - if [ $TRAVIS_BRANCH == 'master' ]; then cd ${APPPATH} && make publish
+  - if [ ${TRAVIS_BRANCH} == 'master' ]; then cd ${APPPATH} && make publish
 after_script:
   - docker stop httpbin
