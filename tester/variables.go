@@ -49,13 +49,13 @@ func replaceVariables(runner *Runner, testCase *Case, s string) (string, error) 
 		var found bool
 
 		// check variables at Case-level first
-		if val, ok := testCase.GlobalVariables[variableName]; ok {
+		if val, ok := testCase.Locals[variableName]; ok {
 			replacement = val
 			found = true
 		}
 
 		// if not found at Case-level, look for variables in the Test
-		if val, ok := runner.test.LocalVariables[variableName]; !found && ok {
+		if val, ok := runner.test.Globals[variableName]; !found && ok {
 			replacement = val
 			found = true
 		}
@@ -77,7 +77,7 @@ func replaceVariables(runner *Runner, testCase *Case, s string) (string, error) 
 
 	for _, match := range matched {
 		variableName := strings.Trim(match, "::")
-		if val, ok := testCase.GlobalVariables[variableName]; ok {
+		if val, ok := testCase.Locals[variableName]; ok {
 			s = strings.Replace(s, match, val, -1)
 		}
 	}

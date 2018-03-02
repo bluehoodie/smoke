@@ -29,14 +29,14 @@ type Case struct {
 	Body    string            `json:"body"`
 	Headers map[string]string `json:"headers"`
 
-	GlobalVariables map[string]string `json:"locals"`
+	Locals map[string]string `json:"locals"`
 
 	ExpectedHttpCode     int    `json:"http_code_is"`
 	ExpectedResponseBody string `json:"response_body_contains"`
 }
 
 type Test struct {
-	LocalVariables map[string]string `json:"globals"`
+	Globals map[string]string `json:"globals"`
 
 	Cases []Case `json:"cases"`
 }
