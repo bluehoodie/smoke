@@ -29,15 +29,16 @@ type Case struct {
 	Body    string            `json:"body"`
 	Headers map[string]string `json:"headers"`
 
-	Variables map[string]string `json:"variables"`
+	GlobalVariables map[string]string `json:"locals"`
 
 	ExpectedHttpCode     int    `json:"http_code_is"`
 	ExpectedResponseBody string `json:"response_body_contains"`
 }
 
 type Test struct {
-	Variables map[string]string `json:"variables"`
-	Cases     []Case            `json:"cases"`
+	LocalVariables map[string]string `json:"globals"`
+
+	Cases []Case `json:"cases"`
 }
 
 type Runner struct {

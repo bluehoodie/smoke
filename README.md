@@ -37,12 +37,10 @@ The test file is a JSON file with the following structure:
 
 ```
 {
-    "variables": {"variable_name": "variable_value", ...}
+    "globals": {"variable_name": "variable_value", ...}
     "cases" : [<CASE_1>, ... <CASE_N>]
 }
 ```
-
-The variables are a map of string values which can be accessed in every test case defined in the current file.  
 
 Each test CASE is of the form:
 
@@ -53,7 +51,7 @@ Each test CASE is of the form:
     "method": "<http verb, ie: GET, POST, etc>",
     "body": "<http request body. optional">
     "headers": {"header_name": "header_value" ...} // <map of header values to add to the request. optional>,
-    "variables": {"variable_name": "variable_value", ...} // <map of variables specific to this test case. will override the global values>
+    "locals": {"variable_name": "variable_value", ...} // <map of variables specific to this test case. will override the global values>
     
     "http_code_is": <integer representing the expected http code in the result>
     "response_body_contains": <string representing an expected value within the resulting response body>" 
@@ -66,8 +64,8 @@ Variables can be used in the path, body or header values. The way a variable is 
  
 The order of precedence for looking for variable values is:
 
-1. variables defined in the test-case map
-2. variables defined in the outer variables map
+1. local variables defined in the test-case map ("locals")
+2. global variables defined in the outer variables map ("globals")
 3. environment variables
 
 If no value is found, then the test will fail.

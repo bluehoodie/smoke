@@ -1,5 +1,5 @@
 {
-  "variables": {
+  "globals": {
     "token": "token123"
   },
   "cases": [
@@ -37,7 +37,7 @@
       "name": "httpbin_get_body_with_test_variable",
       "path": "/get?foo=::token::&bar=1",
       "method": "GET",
-      "variables": {"token": "token456"},
+      "locals": {"token": "token456"},
 
       "http_code_is": 200,
       "response_body_contains": "token456"
