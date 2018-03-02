@@ -15,6 +15,6 @@ before_script:
   - docker login -u="$DOCKERHUB_LOGIN" -p="$DOCKERHUB_PASSWORD"
 script:
   - smoke -f ${APPPATH}/smoke_test.json -u http://localhost -p 8000 -v
-  - docker stop httpbin
 after_script:
   - docker push bluehoodie/httpbin
+  - docker stop httpbin
