@@ -25,14 +25,14 @@
       "response_body_contains": "hello"
     },
     {
-      "name": "httpbin_get_body_with_variable",
+      "name": "httpbin_get_body_with_global_variable",
       "path": "/get?foo=::token::&bar=1",
       "method": "GET",
 
       "response_body_contains": "token123"
     },
     {
-      "name": "httpbin_get_body_with_test_variable",
+      "name": "httpbin_get_body_with_local_variable",
       "path": "/get?foo=::token::&bar=1",
       "method": "GET",
       "locals": {"token": "token456"},
@@ -55,12 +55,21 @@
       "response_body_contains": "hello"
     },
     {
-      "name": "httpbin_post_body_with_variable",
+      "name": "httpbin_post_body_with_global_variable",
       "path": "/post",
       "method": "POST",
       "body": "this is a test ::token::",
 
       "response_body_contains": "token123"
+    },
+    {
+      "name": "httpbin_post_body_with_local_variable",
+      "path": "/post",
+      "method": "POST",
+      "body": "this is a test ::token::",
+      "locals": {"token": "token456"},
+
+      "response_body_contains": "token456"
     },
     {
       "name": "httpbin_post_body_with_environment_variable",
@@ -79,12 +88,21 @@
       "response_body_contains": "test_value"
     },
     {
-      "name": "httpbin_headers_with_variable",
+      "name": "httpbin_headers_with_global_variable",
       "path": "/headers",
       "method": "GET",
       "headers": {"test_header": "::token::"},
 
       "response_body_contains": "token123"
+    },
+    {
+      "name": "httpbin_headers_with_local_variable",
+      "path": "/headers",
+      "method": "GET",
+      "headers": {"test_header": "::token::"},
+      "locals": {"token": "token456"},
+
+      "response_body_contains": "token456"
     },
     {
       "name": "httpbin_headers_with_environment_variable",
