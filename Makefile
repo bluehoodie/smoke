@@ -7,6 +7,7 @@ build:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o smoke main.go
 
 container:
+	dep ensure
 	docker build -t bluehoodie/smoke .
 
 publish: container
