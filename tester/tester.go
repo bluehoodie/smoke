@@ -32,7 +32,7 @@ type Case struct {
 
 	Locals map[string]string `json:"locals"`
 
-	ExpectedHttpCode     int    `json:"http_code_is"`
+	ExpectedHTTPCode     int    `json:"http_code_is"`
 	ExpectedResponseBody string `json:"response_body_contains"`
 }
 
@@ -137,9 +137,9 @@ func (runner *Runner) Run() bool {
 		}
 
 		// validate http status code
-		if testCase.ExpectedHttpCode != 0 {
-			if resp.StatusCode != testCase.ExpectedHttpCode {
-				failure(runner.failureOutput, testCase.Name, "expected http response code %d got %d", testCase.ExpectedHttpCode, resp.StatusCode)
+		if testCase.ExpectedHTTPCode != 0 {
+			if resp.StatusCode != testCase.ExpectedHTTPCode {
+				failure(runner.failureOutput, testCase.Name, "expected http response code %d got %d", testCase.ExpectedHTTPCode, resp.StatusCode)
 				failCount++
 				ok = false
 				continue

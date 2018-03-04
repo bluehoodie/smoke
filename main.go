@@ -13,7 +13,7 @@ import (
 var opts struct {
 	Verbose bool   `short:"v" long:"verbose" description:"print out full report including successful results"`
 	File    string `short:"f" long:"file" default:"./smoke_test.json" description:"file containing the test definition"`
-	Url     string `short:"u" long:"url" default:"http://localhost" description:"url endpoint to test"`
+	URL     string `short:"u" long:"url" default:"http://localhost" description:"url endpoint to test"`
 	Port    int    `short:"p" long:"port" description:"port the service is running on"`
 }
 
@@ -38,7 +38,7 @@ func main() {
 		os.Exit(2)
 	}
 
-	url := opts.Url
+	url := opts.URL
 	if opts.Port != 0 {
 		url = fmt.Sprintf("%s:%d", url, opts.Port)
 	}
