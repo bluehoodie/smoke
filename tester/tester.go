@@ -22,6 +22,7 @@ func init() {
 	variableRegex = re
 }
 
+// Case represents the data for a single test case
 type Case struct {
 	Name    string            `json:"name"`
 	Path    string            `json:"path"`
@@ -35,12 +36,14 @@ type Case struct {
 	ExpectedResponseBody string `json:"response_body_contains"`
 }
 
+// Test represents the data for a full test suite
 type Test struct {
 	Globals map[string]string `json:"globals"`
 
 	Cases []Case `json:"cases"`
 }
 
+// Runner is the primary struct of this package and is responsible for running the test suite
 type Runner struct {
 	successOutput io.Writer
 	failureOutput io.Writer
@@ -51,8 +54,10 @@ type Runner struct {
 	url  string
 }
 
+// Option is a function which can change some properties of the Runner
 type Option func(*Runner)
 
+// WithVerboseModeOn returns an Option which sets the verbosity of the runner.  Default is false.
 func WithVerboseModeOn(verboseMode bool) Option {
 	return func(r *Runner) {
 		if verboseMode {
@@ -62,6 +67,7 @@ func WithVerboseModeOn(verboseMode bool) Option {
 	}
 }
 
+// NewRunner returns a *Runner for a given url and Test.
 func NewRunner(url string, test Test, opts ...Option) *Runner {
 	client := &http.Client{
 		Timeout: 1 * time.Second,
@@ -83,6 +89,8 @@ func NewRunner(url string, test Test, opts ...Option) *Runner {
 	return runner
 }
 
+// Run is the method which runs the Test associated with this Runner.
+// Returns a bool representing the result of the test.
 func (runner *Runner) Run() bool {
 	ok := true
 
