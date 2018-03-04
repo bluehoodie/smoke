@@ -1,13 +1,12 @@
-.PHONY: install build container publish httpbin-container httpbin-publish
+.PHONY: install dep container publish httpbin-container httpbin-publish
 
 install:
 	go build -o ${GOPATH}/bin/smoke main.go
 
-build:
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o smoke main.go
-
-container:
+dep:
 	dep ensure
+
+container: dep
 	docker build -t bluehoodie/smoke .
 
 publish: container
