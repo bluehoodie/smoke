@@ -7,56 +7,51 @@ A simple application to write and run smoke tests for RESTful APIs.
 
 ## Getting Started
 
-### Installing
+### Running
 
-To install, simply run
+The most convenient way of running this code, especially in a CI environment, is to use the docker image `bluehoodie/smoke`
 
-```go get github.com/bluehoodie/smoke```
+`docker run -v {YOUR_TESTFILE_LOCATION}:/test bluehoodie/smoke -f /test/{YOUR_TESTFILE} -u http://{YOUR_URL}`
 
-or you can download the source code and run 
+Otherwise, it can be installed locally by running 
 
-```make install```
+`go get github.com/bluehoodie/smoke`
 
-This will put the executable ```smoke``` in your ```$GOPATH/bin``` directory
-
-## Usage
+### Usage
 
 ``` 
-Usage of smoke:
-  -file string
-        file containing the test definition (required)
-  -url string
-        url endpoint to test (required)
-  -v    verbose mode will print out full report including successful results (optional. default: false)
+Usage:
+  smoke [OPTIONS]
 
+Application Options:
+  -v, --verbose  print out full report including successful results
+  -f, --file=    file containing the test definition (default: ./smoke_test.json)
+  -u, --url=     url endpoint to test (default: http://localhost)
+  -p, --port=    port the service is running on
+
+Help Options:
+  -h, --help     Show this help message
 ```
 
-### Writing a test file
+## Writing a test file
 
-The test file is a JSON file with the following structure:
+The test file can be either a JSON or YAML map with the following elements:
 
-```
-{
-    "globals": {"variable_name": "variable_value", ...}
-    "cases" : [<CASE_1>, ... <CASE_N>]
-}
-```
+- `globals`: a map of of keys to values representing variables which can be accessed in all test cases.
+- `contracts`: a list of user-defined contracts reprenting each case.
 
-Each test CASE is of the form:
+The structure of a contract element is a map with the following elements:
 
-```
-{
-    "name": "<test case name>",
-    "path": "<uri endpoint to call for this test. (will be appended to the URL defined in the command)>",
-    "method": "<http verb, ie: GET, POST, etc>",
-    "body": "<http request body. optional">
-    "headers": {"header_name": "header_value" ...} // <map of header values to add to the request. optional>,
-    "locals": {"variable_name": "variable_value", ...} // <map of variables specific to this test case. will override the global values>
-    
-    "http_code_is": <integer representing the expected http code in the result>
-    "response_body_contains": <string representing an expected value within the resulting response body>" 
-}
-```
+- `name`: test case name,
+- `path`: uri endpoint to call for this test. (will be appended to the URL defined in the command),
+- `method`: http verb, ie: GET, POST, etc
+- `body`: http request body. (optional)
+- `headers`: map of header values to add to the http request (optional),
+- `locals`: map of variables specific to this test case. will override the global values
+- `http_code_is`: integer representing the expected http code in the result
+- `response_body_contains`: string representing an expected value within the resulting response body 
+
+See the `smoke_test.json` and `smoke_test.yaml` files for examples. 
 
 ### Variables
 

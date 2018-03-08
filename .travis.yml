@@ -15,12 +15,12 @@ before_script:
 install:
   - go get github.com/bluehoodie/smoke
 script:
-  - smoke -f ${APPPATH}/smoke_test.json -u http://localhost -p 8000 -v
-  - smoke -f ${APPPATH}/smoke_test.yaml -u http://localhost -p 8000 -v
+  - smoke -f $APPPATH/smoke_test.json -u http://localhost -p 8000 -v
+  - smoke -f $APPPATH/smoke_test.yaml -u http://localhost -p 8000 -v
 after_script:
   - docker stop httpbin
 after_success:
   - go get github.com/golang/dep/cmd/dep
-  - cd ${APPPATH}
+  - cd $APPPATH
   - if [[ $TRAVIS_PULL_REQUEST == "false" ]] && [[ $TRAVIS_BRANCH == "master" ]]; then docker login -u="$DOCKERHUB_LOGIN" -p="$DOCKERHUB_PASSWORD"; fi
   - if [[ $TRAVIS_PULL_REQUEST == "false" ]] && [[ $TRAVIS_BRANCH == "master" ]]; then make publish; fi
