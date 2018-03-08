@@ -56,6 +56,7 @@ func unmarshal(filename string, in []byte, out interface{}) error {
 	parts := strings.Split(filename, ".")
 	switch parts[len(parts)-1] {
 	case "yaml":
+		fallthrough
 	case "yml":
 		unmarshalError = yaml.Unmarshal(in, out)
 	default:
