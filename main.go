@@ -5,9 +5,11 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"strings"
 
 	"github.com/bluehoodie/smoke/tester"
 	"github.com/jessevdk/go-flags"
+	yaml "gopkg.in/yaml.v2"
 )
 
 var opts struct {
@@ -31,9 +33,8 @@ func main() {
 		os.Exit(2)
 	}
 
-	t := &tester.Test{}
-	err = json.Unmarshal(data, t)
-	if err != nil {
+	t := tester.Test{}
+	if err := unmarshal(opts.File, data, &t); err != nil {
 		fmt.Fprintf(os.Stderr, "could not unmarshal test data: %v\n", err)
 		os.Exit(2)
 	}
@@ -43,8 +44,23 @@ func main() {
 		url = fmt.Sprintf("%s:%d", url, opts.Port)
 	}
 
-	ok := tester.NewRunner(url, *t, tester.WithVerboseModeOn(opts.Verbose)).Run()
+	ok := tester.NewRunner(url, t, tester.WithVerboseModeOn(opts.Verbose)).Run()
 	if !ok {
 		os.Exit(1)
 	}
+}
+
+func unmarshal(filename string, in []byte, out interface{}) error {
+	var unmarshalError error
+
+	parts := strings.Split(filename, ".")
+	switch parts[len(parts)-1] {
+	case "yaml":
+	case "yml":
+		unmarshalError = yaml.Unmarshal(in, out)
+	default:
+		unmarshalError = json.Unmarshal(in, out)
+	}
+
+	return unmarshalError
 }
