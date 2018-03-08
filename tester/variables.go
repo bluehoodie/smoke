@@ -3,12 +3,25 @@ package tester
 import (
 	"fmt"
 	"os"
+	"regexp"
 	"strings"
 
 	"github.com/pkg/errors"
 )
 
-func parseVariables(runner *Runner, testCase *Case) error {
+var (
+	variableRegex *regexp.Regexp
+)
+
+func init() {
+	re, err := regexp.Compile(`::([\w]+)::`)
+	if err != nil {
+		panic(err)
+	}
+	variableRegex = re
+}
+
+func parseVariables(runner *Runner, testCase *Contract) error {
 	//parse path
 	parsedPath, err := replaceVariables(runner, testCase, testCase.Path)
 	if err != nil {
@@ -35,7 +48,7 @@ func parseVariables(runner *Runner, testCase *Case) error {
 	return nil
 }
 
-func replaceVariables(runner *Runner, testCase *Case, s string) (string, error) {
+func replaceVariables(runner *Runner, testCase *Contract, s string) (string, error) {
 	matched := variableRegex.FindAllString(s, -1)
 
 	if len(matched) == 0 {

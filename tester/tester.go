@@ -5,42 +5,30 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
-	"regexp"
 	"strings"
 	"time"
 )
 
-var (
-	variableRegex *regexp.Regexp
-)
+// Contract represents the data for a single test case: the definition of the HTTP call
+// and the expected result
+type Contract struct {
+	Name    string            `json:"name" yaml:"name"`
+	Path    string            `json:"path" yaml:"path"`
+	Method  string            `json:"method" yaml:"method"`
+	Body    string            `json:"body" yaml:"body"`
+	Headers map[string]string `json:"headers" yaml:"headers"`
 
-func init() {
-	re, err := regexp.Compile(`::([\w]+)::`)
-	if err != nil {
-		panic(err)
-	}
-	variableRegex = re
-}
+	Locals map[string]string `json:"locals" yaml:"locals"`
 
-// Case represents the data for a single test case
-type Case struct {
-	Name    string            `json:"name"`
-	Path    string            `json:"path"`
-	Method  string            `json:"method"`
-	Body    string            `json:"body"`
-	Headers map[string]string `json:"headers"`
-
-	Locals map[string]string `json:"locals"`
-
-	ExpectedHTTPCode     int    `json:"http_code_is"`
-	ExpectedResponseBody string `json:"response_body_contains"`
+	ExpectedHTTPCode     int    `json:"http_code_is" yaml:"http_code_is"`
+	ExpectedResponseBody string `json:"response_body_contains" yaml:"response_body_contains"`
 }
 
 // Test represents the data for a full test suite
 type Test struct {
-	Globals map[string]string `json:"globals"`
+	Globals map[string]string `json:"globals" yaml:"globals"`
 
-	Cases []Case `json:"cases"`
+	Contracts []Contract `json:"contracts" yaml:"contracts"`
 }
 
 // Runner is the primary struct of this package and is responsible for running the test suite
@@ -95,7 +83,7 @@ func (runner *Runner) Run() bool {
 	ok := true
 
 	// keep track of all response bodies to close
-	toClose := make([]io.Closer, 0, len(runner.test.Cases))
+	toClose := make([]io.Closer, 0, len(runner.test.Contracts))
 	defer func() {
 		for _, closer := range toClose {
 			closer.Close()
@@ -103,7 +91,7 @@ func (runner *Runner) Run() bool {
 	}()
 
 	failCount := 0
-	for _, testCase := range runner.test.Cases {
+	for _, testCase := range runner.test.Contracts {
 		err := parseVariables(runner, &testCase)
 		if err != nil {
 			failure(runner.failureOutput, testCase.Name, "could not parse variables: %v", err)
@@ -169,7 +157,7 @@ func (runner *Runner) Run() bool {
 	}
 
 	if !ok {
-		red.Fprintf(runner.failureOutput, "FAILED (%d of %d tests failed)\n", failCount, len(runner.test.Cases))
+		red.Fprintf(runner.failureOutput, "FAILED (%d of %d tests failed)\n", failCount, len(runner.test.Contracts))
 	} else {
 		boldGreen.Fprint(runner.successOutput, "OK\n")
 	}

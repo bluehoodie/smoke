@@ -2,7 +2,7 @@
   "globals": {
     "token": "token123"
   },
-  "cases": [
+  "contracts": [
     {
       "name": "httpbin",
       "path": "/",

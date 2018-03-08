@@ -35,11 +35,17 @@
   branch = "master"
   name = "golang.org/x/sys"
   packages = ["unix"]
-  revision = "f6cff0780e542efa0c8e864dc8fa522808f6a598"
+  revision = "dd2ff4accc098aceecb86b36eaa7829b2a17b1c9"
+
+[[projects]]
+  name = "gopkg.in/yaml.v2"
+  packages = ["."]
+  revision = "7f97868eec74b32b0982dd158a51a446d1da7eb5"
+  version = "v2.1.1"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "14a037e5f0eba29ec75c720b2d9102acd3179b9b98dda8a457afd2531a0dc69f"
+  inputs-digest = "cce4ad77cd7638b7e5a2df477ce0a8fbc45f00e5586de0ad3963be6fe324d4c3"
   solver-name = "gps-cdcl"
   solver-version = 1

@@ -1,0 +1,105 @@
+---
+globals:
+  token: token123
+  
+contracts:
+- name: httpbin
+  path: "/"
+  method: GET
+
+  http_code_is: 200
+
+- name: httpbin_status_code_check
+  path: "/status/123"
+  method: GET
+
+  http_code_is: 123
+
+- name: httpbin_get_body
+  path: "/get?foo=hello!"
+  method: GET
+
+  response_body_contains: hello
+
+- name: httpbin_get_body_with_global_variable
+  path: "/get?foo=::token::&bar=1"
+  method: GET
+
+  response_body_contains: token123
+
+- name: httpbin_get_body_with_local_variable
+  path: "/get?foo=::token::&bar=1"
+  method: GET
+  locals:
+    token: token456
+
+  response_body_contains: token456
+
+- name: httpbin_get_body_with_environment_variable
+  path: "/get?foo=::envtoken::&bar=1"
+  method: GET
+
+  response_body_contains: token235
+
+- name: httpbin_post_body
+  path: "/post"
+  method: POST
+  body: hello!
+  
+  response_body_contains: hello
+
+- name: httpbin_post_body_with_global_variable
+  path: "/post"
+  method: POST
+  body: 'this is a test ::token::'
+
+  response_body_contains: token123
+
+- name: httpbin_post_body_with_local_variable
+  path: "/post"
+  method: POST
+  body: 'this is a test ::token::'
+  locals:
+    token: token456
+
+  response_body_contains: token456
+
+- name: httpbin_post_body_with_environment_variable
+  path: "/post"
+  method: POST
+  body: 'this is a test ::envtoken::'
+
+  response_body_contains: token235
+
+- name: httpbin_headers
+  path: "/headers"
+  method: GET
+  headers:
+    test_header: test_value
+
+  response_body_contains: test_value
+
+- name: httpbin_headers_with_global_variable
+  path: "/headers"
+  method: GET
+  headers:
+    test_header: "::token::"
+
+  response_body_contains: token123
+
+- name: httpbin_headers_with_local_variable
+  path: "/headers"
+  method: GET
+  headers:
+    test_header: "::token::"
+  locals:
+    token: token456
+
+  response_body_contains: token456
+
+- name: httpbin_headers_with_environment_variable
+  path: "/headers"
+  method: GET
+  headers:
+    test_header: "::envtoken::"
+  response_body_contains: token235
