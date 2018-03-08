@@ -1,12 +1,26 @@
 package tester
 
 import (
+	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"os"
 	"strings"
 	"time"
+
+	"github.com/fatih/color"
+)
+
+const (
+	good = "\u2713"
+	bad  = "\u2717"
+)
+
+var (
+	red       = color.New(color.FgRed, color.Bold)
+	green     = color.New(color.FgGreen)
+	boldGreen = color.New(color.FgGreen, color.Bold)
 )
 
 // Contract represents the data for a single test case: the definition of the HTTP call
@@ -80,87 +94,99 @@ func NewRunner(url string, test Test, opts ...Option) *Runner {
 // Run is the method which runs the Test associated with this Runner.
 // Returns a bool representing the result of the test.
 func (runner *Runner) Run() bool {
-	ok := true
-
-	// keep track of all response bodies to close
-	toClose := make([]io.Closer, 0, len(runner.test.Contracts))
-	defer func() {
-		for _, closer := range toClose {
-			closer.Close()
-		}
-	}()
-
 	failCount := 0
-	for _, testCase := range runner.test.Contracts {
-		err := parseVariables(runner, &testCase)
-		if err != nil {
-			failure(runner.failureOutput, testCase.Name, "could not parse variables: %v", err)
+
+	for _, contract := range runner.test.Contracts {
+		if err := parseVariables(runner, &contract); err != nil {
+			failure(runner.failureOutput, contract.Name, err.Error())
 			failCount++
-			ok = false
 			continue
 		}
 
-		// create request
-		path := strings.Join([]string{runner.url, testCase.Path}, "")
-		req, err := http.NewRequest(strings.ToUpper(testCase.Method), path, strings.NewReader(testCase.Body))
+		resp, err := createAndSendRequest(contract, runner.url, runner.client)
 		if err != nil {
-			failure(runner.failureOutput, testCase.Name, "could not create http request: %v", err)
+			failure(runner.failureOutput, contract.Name, err.Error())
 			failCount++
-			ok = false
 			continue
 		}
 
-		// set headers
-		for key, value := range testCase.Headers {
-			req.Header.Set(key, value)
-		}
-
-		// send request
-		resp, err := runner.client.Do(req)
-		if err != nil {
-			failure(runner.failureOutput, testCase.Name, "error sending request: %v", err)
+		if err := validateHTTPCode(contract, resp); err != nil {
+			failure(runner.failureOutput, contract.Name, err.Error())
 			failCount++
-			ok = false
 			continue
-		}
-
-		// validate http status code
-		if testCase.ExpectedHTTPCode != 0 {
-			if resp.StatusCode != testCase.ExpectedHTTPCode {
-				failure(runner.failureOutput, testCase.Name, "expected http response code %d got %d", testCase.ExpectedHTTPCode, resp.StatusCode)
-				failCount++
-				ok = false
-				continue
-			}
 		}
 
 		// validate http response body
-		if testCase.ExpectedResponseBody != "" {
-			body, err := ioutil.ReadAll(resp.Body)
-			if err != nil {
-				failure(runner.failureOutput, testCase.Name, "error reading response body: %v", err)
-				failCount++
-				ok = false
-				continue
-			}
-			toClose = append(toClose, resp.Body)
-
-			if !strings.Contains(string(body), testCase.ExpectedResponseBody) {
-				failure(runner.failureOutput, testCase.Name, "expected response not found in the body")
-				failCount++
-				ok = false
-				continue
-			}
+		if err := validateResponseBody(contract, resp); err != nil {
+			failure(runner.failureOutput, contract.Name, err.Error())
+			failCount++
+			continue
 		}
 
-		success(runner.successOutput, testCase.Name)
+		success(runner.successOutput, contract.Name)
 	}
 
-	if !ok {
+	if failCount > 0 {
 		red.Fprintf(runner.failureOutput, "FAILED (%d of %d tests failed)\n", failCount, len(runner.test.Contracts))
-	} else {
-		boldGreen.Fprint(runner.successOutput, "OK\n")
+		return false
 	}
 
-	return ok
+	boldGreen.Fprint(runner.successOutput, "OK\n")
+	return true
+}
+
+func success(out io.Writer, name string) {
+	green.Fprintf(out, "%v\t%s\n", good, name)
+}
+
+func failure(out io.Writer, name, format string, args ...interface{}) {
+	red.Fprintf(out, "%v\t%s: %s\n", bad, name, fmt.Sprintf(format, args...))
+}
+
+func createAndSendRequest(contract Contract, url string, client *http.Client) (*http.Response, error) {
+	// create request
+	path := strings.Join([]string{url, contract.Path}, "")
+	req, err := http.NewRequest(strings.ToUpper(contract.Method), path, strings.NewReader(contract.Body))
+	if err != nil {
+		return nil, fmt.Errorf("could not create http request: %v", err)
+	}
+
+	// set headers
+	for key, value := range contract.Headers {
+		req.Header.Set(key, value)
+	}
+
+	// send request
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("error sending request: %v", err)
+	}
+
+	return resp, nil
+}
+
+func validateHTTPCode(contract Contract, resp *http.Response) error {
+	if contract.ExpectedHTTPCode != 0 {
+		if resp.StatusCode != contract.ExpectedHTTPCode {
+			return fmt.Errorf("expected http response code %d got %d", contract.ExpectedHTTPCode, resp.StatusCode)
+		}
+	}
+
+	return nil
+}
+
+func validateResponseBody(contract Contract, resp *http.Response) error {
+	if contract.ExpectedResponseBody != "" {
+		body, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return fmt.Errorf("error reading response body: %v", err)
+		}
+		defer resp.Body.Close()
+
+		if !strings.Contains(string(body), contract.ExpectedResponseBody) {
+			return fmt.Errorf("expected response not found in the body")
+		}
+	}
+
+	return nil
 }
