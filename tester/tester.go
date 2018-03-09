@@ -94,35 +94,13 @@ func NewRunner(url string, test Test, opts ...Option) *Runner {
 // Run is the method which runs the Test associated with this Runner.
 // Returns a bool representing the result of the test.
 func (runner *Runner) Run() bool {
-	failCount := 0
-
+	var failCount int
 	for _, contract := range runner.test.Contracts {
-		if err := parseVariables(runner, &contract); err != nil {
+		if err := runner.validateContract(contract); err != nil {
 			failure(runner.failureOutput, contract.Name, err.Error())
 			failCount++
 			continue
 		}
-
-		resp, err := createAndSendRequest(contract, runner.url, runner.client)
-		if err != nil {
-			failure(runner.failureOutput, contract.Name, err.Error())
-			failCount++
-			continue
-		}
-
-		if err := validateHTTPCode(contract, resp); err != nil {
-			failure(runner.failureOutput, contract.Name, err.Error())
-			failCount++
-			continue
-		}
-
-		// validate http response body
-		if err := validateResponseBody(contract, resp); err != nil {
-			failure(runner.failureOutput, contract.Name, err.Error())
-			failCount++
-			continue
-		}
-
 		success(runner.successOutput, contract.Name)
 	}
 
@@ -133,6 +111,28 @@ func (runner *Runner) Run() bool {
 
 	boldGreen.Fprint(runner.successOutput, "OK\n")
 	return true
+}
+
+func (runner *Runner) validateContract(contract Contract) (err error) {
+	if err = parseVariables(runner, &contract); err != nil {
+		return
+	}
+
+	var resp *http.Response
+	resp, err = createAndSendRequest(contract, runner.url, runner.client)
+	if err != nil {
+		return
+	}
+
+	if err = validateHTTPCode(contract, resp); err != nil {
+		return
+	}
+
+	if err = validateResponseBody(contract, resp); err != nil {
+		return
+	}
+
+	return
 }
 
 func success(out io.Writer, name string) {
