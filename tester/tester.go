@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"os"
 	"strings"
-	"time"
 
 	"github.com/fatih/color"
 )
@@ -69,17 +68,20 @@ func WithVerboseModeOn(verboseMode bool) Option {
 	}
 }
 
+// WithHTTPClient returns an Option which overrides the default http client
+func WithHTTPClient(client *http.Client) Option {
+	return func(r *Runner) {
+		r.client = client
+	}
+}
+
 // NewRunner returns a *Runner for a given url and Test.
 func NewRunner(url string, test Test, opts ...Option) *Runner {
-	client := &http.Client{
-		Timeout: 1 * time.Second,
-	}
-
 	runner := &Runner{
 		url:  url,
 		test: test,
 
-		client:        client,
+		client:        http.DefaultClient,
 		successOutput: ioutil.Discard,
 		failureOutput: os.Stderr,
 	}

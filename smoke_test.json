@@ -111,5 +111,12 @@
       "headers": {"test_header": "::envtoken::"},
 
       "response_body_contains": "token235"
+    },
+    {
+      "name": "httpbin_redirect",
+      "path": "/redirect/1",
+      "method": "GET",
+
+      "http_code_is": 302
     }]
 }

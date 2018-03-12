@@ -4,8 +4,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"net/http"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/bluehoodie/smoke/tester"
 	"github.com/jessevdk/go-flags"
@@ -17,6 +19,7 @@ var opts struct {
 	File    string `short:"f" long:"file" default:"./smoke_test.json" description:"file containing the test definition"`
 	URL     string `short:"u" long:"url" default:"http://localhost" description:"url endpoint to test"`
 	Port    int    `short:"p" long:"port" description:"port the service is running on"`
+	Timeout int    `short:"t" long:"timeout" default:"1" description:"timeout in seconds for each http request made"`
 }
 
 func init() {
@@ -44,7 +47,19 @@ func main() {
 		url = fmt.Sprintf("%s:%d", url, opts.Port)
 	}
 
-	ok := tester.NewRunner(url, t, tester.WithVerboseModeOn(opts.Verbose)).Run()
+	client := &http.Client{
+		Timeout: time.Duration(opts.Timeout) * time.Second,
+		CheckRedirect: func(req *http.Request, via []*http.Request) error {
+			return http.ErrUseLastResponse
+		},
+	}
+
+	testRunner := tester.NewRunner(url, t,
+		tester.WithVerboseModeOn(opts.Verbose),
+		tester.WithHTTPClient(client),
+	)
+
+	ok := testRunner.Run()
 	if !ok {
 		os.Exit(1)
 	}
