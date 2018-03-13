@@ -28,6 +28,7 @@ Application Options:
   -f, --file=    file containing the test definition (default: ./smoke_test.json)
   -u, --url=     url endpoint to test (default: http://localhost)
   -p, --port=    port the service is running on
+  -t, --timeout= timeout in seconds for each http request made (default: 1)
 
 Help Options:
   -h, --help     Show this help message
@@ -37,16 +38,16 @@ Help Options:
 
 The test file can be either a JSON or YAML map with the following elements:
 
-- `globals`: a map of of keys to values representing variables which can be accessed in all test cases.
-- `contracts`: a list of user-defined contracts reprenting each case.
+- `globals`: a map of of keys to values representing variables which can be accessed in all test cases
+- `contracts`: a list of user-defined contracts reprenting each test case
 
 The structure of a contract element is a map with the following elements:
 
-- `name`: test case name,
-- `path`: uri endpoint to call for this test. (will be appended to the URL defined in the command),
+- `name`: label for this test case
+- `path`: uri endpoint to call for this test. (will be appended to the URL defined in the command)
 - `method`: http verb, ie: GET, POST, etc
 - `body`: http request body. (optional)
-- `headers`: map of header values to add to the http request (optional),
+- `headers`: map of header values to add to the http request (optional)
 - `locals`: map of variables specific to this test case. will override the global values
 - `http_code_is`: integer representing the expected http code in the result
 - `response_body_contains`: string representing an expected value within the resulting response body 
@@ -59,7 +60,7 @@ Variables can be used in the path, body or header values. The way a variable is 
  
 The order of precedence for looking for variable values is:
 
-1. local variables defined in the test-case map ("locals")
+1. local variables defined in the contract map ("locals")
 2. global variables defined in the outer variables map ("globals")
 3. environment variables
 
