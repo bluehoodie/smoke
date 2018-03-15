@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"path"
 	"strings"
 	"time"
 
@@ -68,8 +69,8 @@ func main() {
 func unmarshal(filename string, in []byte, out interface{}) error {
 	var unmarshalError error
 
-	parts := strings.Split(filename, ".")
-	switch parts[len(parts)-1] {
+	ext := strings.Trim(path.Ext(filename), ".")
+	switch ext {
 	case "yaml":
 		fallthrough
 	case "yml":
