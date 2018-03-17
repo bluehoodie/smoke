@@ -1,5 +1,9 @@
 sudo: required
 language: go
+addons:
+  apt:
+    packages:
+    - rpm
 services:
   - docker
 go:
@@ -20,7 +24,15 @@ script:
 after_script:
   - docker stop httpbin
 after_success:
+  - echo "is pull request:"
+  - echo ${TRAVIS_PULL_REQUEST}
+  - echo "branch:"
+  - echo ${TRAVIS_BRANCH}
+  - echo "tag:"
+  - echo ${TRAVIS_TAG}
   - go get github.com/golang/dep/cmd/dep
+  - go get github.com/goreleaser/goreleaser 
   - cd $APPPATH
   - if [[ $TRAVIS_PULL_REQUEST == "false" ]] && [[ $TRAVIS_BRANCH == "master" ]]; then docker login -u="$DOCKERHUB_LOGIN" -p="$DOCKERHUB_PASSWORD"; fi
   - if [[ $TRAVIS_PULL_REQUEST == "false" ]] && [[ $TRAVIS_BRANCH == "master" ]]; then make publish; fi
+  - if [[ $TRAVIS_PULL_REQUEST == "false" ]] && [[ $TRAVIS_BRANCH == $TRAVIS_TAG ]]; then make binary; fi
