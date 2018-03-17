@@ -25,13 +25,8 @@ after_script:
   - docker stop httpbin
 after_success:
   - go get github.com/golang/dep/cmd/dep
+  - go get github.com/goreleaser/goreleaser
   - cd $APPPATH
   - if [[ $TRAVIS_PULL_REQUEST == "false" ]] && [[ $TRAVIS_BRANCH == "master" ]]; then docker login -u="$DOCKERHUB_LOGIN" -p="$DOCKERHUB_PASSWORD"; fi
   - if [[ $TRAVIS_PULL_REQUEST == "false" ]] && [[ $TRAVIS_BRANCH == "master" ]]; then make publish; fi
-deploy:
-- provider: script
-  skip_cleanup: true
-  script: curl -sL http://git.io/goreleaser | bash
-  on:
-    tags: true
-    condition: $TRAVIS_OS_NAME = linux
+  - if [[ $TRAVIS_PULL_REQUEST == "false" ]] && [[ $TRAVIS_BRANCH == "master" ]]; then make binary; fi
