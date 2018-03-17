@@ -1,0 +1,76 @@
+project_name: smoke
+
+build:
+  main: main.go
+  binary: smoke
+  ldflags: -s -w -X github.com/bluehoodie/smoke/smoke.Build={{.Version}}
+  env:
+    - CGO_ENABLED=0
+  goos:
+    - darwin
+    - linux
+    - windows
+    - freebsd
+    - netbsd
+    - openbsd
+    - dragonfly
+  goarch:
+    - amd64
+    - 386
+    - arm
+    - arm64
+  ignore:
+    - goos: openbsd
+      goarch: arm
+      goarm: 6
+
+nfpm:
+  name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+  replacements:
+    amd64: 64bit
+    386: 32bit
+    arm: ARM
+    arm64: ARM64
+    darwin: macOS
+    linux: Linux
+    windows: Windows
+    openbsd: OpenBSD
+    netbsd: NetBSD
+    freebsd: FreeBSD
+    dragonfly: DragonFlyBSD
+
+  vendor: Bluehoodie
+  homepage: https://github.com/bluehoodie
+  maintainer: Colin Dickson <colin.dickson+bluehoodie@gmail.com>
+  description: Software to test HTTP API endpoints.
+  license: MIT
+
+  formats:
+    - deb
+    - rpm
+
+archive:
+  name_template: "{{ .Binary }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+  replacements:
+    amd64: 64bit
+    386: 32bit
+    arm: ARM
+    arm64: ARM64
+    darwin: macOS
+    linux: Linux
+    windows: Windows
+    openbsd: OpenBSD
+    netbsd: NetBSD
+    freebsd: FreeBSD
+    dragonfly: DragonFlyBSD
+  format: tar.gz
+  format_overrides:
+    - goos: windows
+      format: zip
+  files:
+    - LICENSE
+    - README.md
+
+release:
+  draft: true
+  prerelease: true
