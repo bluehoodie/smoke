@@ -13,7 +13,7 @@ publish: container
 	docker push bluehoodie/smoke
 
 binary: dep
-	goreleaser
+	goreleaser --rm-dist
 
 httpbin-container:
 	docker build -t bluehoodie/httpbin -f Dockerfile-httpbin .
