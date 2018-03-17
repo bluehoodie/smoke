@@ -24,12 +24,6 @@ script:
 after_script:
   - docker stop httpbin
 after_success:
-  - echo "is pull request:"
-  - echo ${TRAVIS_PULL_REQUEST}
-  - echo "branch:"
-  - echo ${TRAVIS_BRANCH}
-  - echo "tag:"
-  - echo ${TRAVIS_TAG}
   - go get github.com/golang/dep/cmd/dep
   - go get github.com/goreleaser/goreleaser 
   - cd $APPPATH
