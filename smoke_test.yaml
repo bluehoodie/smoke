@@ -111,17 +111,17 @@ contracts:
   http_code_is: 302
 
 - name: get_output_variable
-  path: "/posts/2"
+  path: "/get"
   method: GET
 
   outputs:
-    userId: "JSON.userId"
+    origin: "JSON.origin"
 
   http_code_is: 200
 
 - name: test_input_variable
-  path: "/users/::userId::"
+  path: "/anything?ip=::origin::"
   method: GET
 
   http_code_is: 200
-  response_body_contains: "\"id\": 1"
+  response_body_contains: "\"ip\": \"1"
