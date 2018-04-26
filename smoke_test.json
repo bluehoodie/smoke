@@ -118,5 +118,24 @@
       "method": "GET",
 
       "http_code_is": 302
-    }]
+    },
+    {
+      "name": "httpbin_set_output_variable",
+      "path": "/get?params=foo",
+      "method": "GET",
+      "outputs": {
+        "test_output_variable": "JSON.args.params"
+      },
+
+      "http_code_is": 200
+    },
+    {
+      "name": "httpbin_verify_output_variable",
+      "path": "/get?params=::test_output_variable::",
+      "method": "GET",
+
+      "http_code_is": 200,
+      "response_body_contains": "foo"
+    }    
+  ]
 }
