@@ -109,3 +109,19 @@ contracts:
   method: GET
 
   http_code_is: 302
+
+- name: get_output_variable
+  path: "/posts/2"
+  method: GET
+
+  outputs:
+    userId: "JSON.userId"
+
+  http_code_is: 200
+
+- name: test_input_variable
+  path: "/users/::userId::"
+  method: GET
+
+  http_code_is: 200
+  response_body_contains: "\"id\": 1"

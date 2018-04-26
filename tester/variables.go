@@ -1,6 +1,7 @@
 package tester
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"regexp"
@@ -85,4 +86,52 @@ func replaceVariables(runner *Runner, contract *Contract, s string) (string, err
 	}
 
 	return s, nil
+}
+
+func parseOutputs(runner *Runner, contract *Contract, body []byte) (err error) {
+	for key, value := range contract.Outputs {
+		s := strings.Split(value, ".")
+		var result string
+		if len(s) > 1 {
+			switch strings.ToUpper(s[0]) {
+			case "JSON":
+				result, err = jsonParser(value, s[1:], body)
+				if err != nil {
+					return
+				}
+			default:
+				return fmt.Errorf("value for variable %v not parsable", key)
+			}
+		}
+		runner.test.Globals[key] = result
+	}
+	return nil
+}
+
+func jsonParser(format string, field []string, body []byte) (value string, err error) {
+	jsonMap := make(map[string]interface{})
+	err = json.Unmarshal(body, &jsonMap)
+	if err != nil {
+		return
+	}
+
+	tmp := jsonMap
+	for i := 0; i < len(field); i++ {
+		if i == len(field)-1 {
+			if val, ok := tmp[field[i]]; ok {
+				value = fmt.Sprint(val)
+				return
+			}
+
+			return "", fmt.Errorf("Value not present on the Json %s", format)
+		}
+
+		if val, ok := tmp[field[i]]; ok {
+			tmp = val.(map[string]interface{})
+		} else {
+			return "", fmt.Errorf("Value not present on the Json %s", format)
+		}
+	}
+
+	return
 }
