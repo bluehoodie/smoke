@@ -123,13 +123,13 @@ func jsonParser(format string, field []string, body []byte) (value string, err e
 				return
 			}
 
-			return "", fmt.Errorf("Value not present on the Json %s", format)
+			return "", fmt.Errorf("value not present in the json object %s", format)
 		}
 
 		if val, ok := tmp[field[i]]; ok {
 			tmp = val.(map[string]interface{})
 		} else {
-			return "", fmt.Errorf("Value not present on the Json %s", format)
+			return "", fmt.Errorf("value not present in the json object %s", format)
 		}
 	}
 
