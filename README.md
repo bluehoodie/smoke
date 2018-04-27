@@ -2,6 +2,8 @@
 
 [![Build Status](https://travis-ci.org/bluehoodie/smoke.svg?branch=master)](https://travis-ci.org/bluehoodie/smoke)
 [![Go Report Card](https://goreportcard.com/badge/github.com/bluehoodie/smoke)](https://goreportcard.com/report/github.com/bluehoodie/smoke)
+[![Coverage Status](https://coveralls.io/repos/github/Tkanos/smoke/badge.svg?branch=master)](https://coveralls.io/github/Tkanos/smoke?branch=master)
+
 
 A simple application to write and run smoke tests for RESTful APIs.
 
