@@ -1,6 +1,7 @@
 package tester
 
 import (
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -287,4 +288,82 @@ func TestParseOutputs(t *testing.T) {
 
 	}
 
+}
+
+var replaceVartt = []struct {
+	s           string
+	contract    *Contract
+	runner      *Runner
+	env         map[string]string
+	err         bool
+	expected    string
+	description string
+}{
+	{
+		s:           "NO PATTERN",
+		err:         false,
+		expected:    "NO PATTERN",
+		description: "If there are no value to replace it should return the string in output",
+	},
+	{
+		s:           "::local::",
+		err:         false,
+		contract:    &Contract{Locals: map[string]string{"local": "1"}},
+		runner:      &Runner{test: Test{Globals: map[string]string{}}},
+		expected:    "1",
+		description: "If should replace the input value by the local one",
+	},
+	{
+		s:           "::global::",
+		err:         false,
+		contract:    &Contract{Locals: map[string]string{}},
+		runner:      &Runner{test: Test{Globals: map[string]string{"global": "1"}}},
+		expected:    "1",
+		description: "If should replace the input value by the global one",
+	},
+	{
+		s:           "::env::",
+		err:         false,
+		contract:    &Contract{Locals: map[string]string{}},
+		runner:      &Runner{test: Test{Globals: map[string]string{}}},
+		env:         map[string]string{"ENV": "1"},
+		expected:    "1",
+		description: "If should replace the input value by the env one",
+	},
+	{
+		s:           "::not_found::",
+		contract:    &Contract{Locals: map[string]string{}},
+		runner:      &Runner{test: Test{Globals: map[string]string{}}},
+		expected:    "::not_found::",
+		err:         true,
+		description: "If should send an error if the value is not on local, global neither env variables",
+	},
+	{
+		s:           "::local::_::global::_::env::",
+		err:         false,
+		contract:    &Contract{Locals: map[string]string{"local": "1"}},
+		runner:      &Runner{test: Test{Globals: map[string]string{"global": "2"}}},
+		env:         map[string]string{"ENV": "3"},
+		expected:    "1_2_3",
+		description: "If should replace all the values if there are many ",
+	},
+}
+
+func TestReplaceVariables(t *testing.T) {
+	for _, tt := range replaceVartt {
+		//arrange
+		if tt.env != nil && len(tt.env) > 0 {
+			// Define env variables
+			for key, value := range tt.env {
+				os.Setenv(key, value)
+			}
+		}
+
+		//act
+		s, err := replaceVariables(tt.runner, tt.contract, tt.s)
+
+		//assert
+		assert.True(t, (err != nil) == tt.err, tt.description)
+		assert.Equal(t, tt.expected, s, tt.description)
+	}
 }
