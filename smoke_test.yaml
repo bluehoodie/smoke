@@ -126,7 +126,7 @@ contracts:
   response_body_contains: "foo"
 
 - name: httpbin_set_array_output_variable
-  path: "/get?params=foo&params=foo2"
+  path: "/get?params=foo&params=bar"
   method: GET
   outputs:
     test_output_variable: "JSON.args.params[1]"
@@ -136,4 +136,4 @@ contracts:
   method: GET
 
   http_code_is: 200
-  response_body_contains: "foo2"
+  response_body_contains: "bar"
