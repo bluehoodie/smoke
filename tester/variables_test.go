@@ -226,3 +226,65 @@ func TestExtractValueFromJSONArray(t *testing.T) {
 		assert.Equal(t, tt.expected, v, tt.description)
 	}
 }
+
+var parseOtt = []struct {
+	runner        *Runner
+	contract      *Contract
+	body          []byte
+	description   string
+	err           bool
+	expectedKey   string
+	expectedValue string
+}{
+	{
+		contract: &Contract{
+			Outputs: make(map[string]string),
+		},
+		err:         false,
+		description: "It should not return an error if there are no outputs",
+	},
+	{
+		contract: &Contract{
+			Outputs: map[string]string{"value": "NOT_MAPPED.whatever"},
+		},
+		err:         true,
+		description: "It should return an error if there are outputs that does not begin by what is expected (JSON)",
+	},
+	{
+		contract: &Contract{
+			Outputs: map[string]string{"value": "JSON.A"},
+		},
+		runner:        &Runner{test: Test{Globals: make(map[string]string)}},
+		body:          []byte(`{"A": 1 }`),
+		err:           false,
+		expectedKey:   "value",
+		expectedValue: "1",
+		description:   "Runner should have an value as output",
+	},
+	{
+		contract: &Contract{
+			Outputs: map[string]string{"value": "JSON.A"},
+		},
+		runner:      &Runner{test: Test{Globals: make(map[string]string)}},
+		body:        []byte(`OBVIOUSLY NOT A JSON`),
+		err:         true,
+		description: "It should return an error if the body does not match with what is exected",
+	},
+}
+
+func TestParseOutputs(t *testing.T) {
+	for _, tt := range parseOtt {
+		//act
+		err := parseOutputs(tt.runner, tt.contract, tt.body)
+
+		//assert
+		assert.True(t, (err != nil) == tt.err, tt.description)
+
+		if tt.expectedKey != "" && err == nil {
+			assert.Contains(t, tt.runner.test.Globals, tt.expectedKey, tt.description)
+			assert.Equal(t, tt.expectedValue, tt.runner.test.Globals[tt.expectedKey], tt.description)
+		}
+
+	}
+
+}
