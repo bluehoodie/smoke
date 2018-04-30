@@ -9,13 +9,21 @@ services:
 go:
   - "1.10"
 env:
-  - PATH=$HOME/gopath/bin:$PATH APPPATH=$HOME/gopath/src/github.com/bluehoodie/smoke/ ENVTOKEN=token235
+  - PATH=$HOME/gopath/bin:$PATH APPPATH=$HOME/gopath/src/github.com/bluehoodie/smoke/ ENVTOKEN=token235 COVERALLS_TOKEN=PPZJ56Ts2op5e2dlIRIhO82p6FPP95mZ1
 before_install:
   # mock web service
   - docker pull bluehoodie/httpbin
   - docker run -d -p 8000:8000 --rm --name httpbin bluehoodie/httpbin
 before_script:
-  - go vet ./...
+   # install dependencies
+  - go get -u github.com/golang/dep/cmd/dep
+  - go get -u golang.org/x/lint/golint
+  - go get golang.org/x/tools/cmd/cover
+  - go get github.com/mattn/goveralls
+  - dep ensure
+  - go test -race -v `go list ./... | grep -v -e /vendor/ -e /mock/`
+  - go list ./... | grep -v /vendor/ | xargs -L1 golint -set_exit_status
+  - go vet `go list ./... | grep -v /vendor/`
 install:
   - go get github.com/bluehoodie/smoke
 script:
@@ -24,8 +32,9 @@ script:
 after_script:
   - docker stop httpbin
 after_success:
-  - go get github.com/golang/dep/cmd/dep
   - go get github.com/goreleaser/goreleaser 
+  - go test ./... -v -covermode=count -coverprofile=coverage.out 
+  - $HOME/gopath/bin/goveralls -coverprofile=coverage.out -service=travis-ci -repotoken $COVERALLS_TOKEN
   - cd $APPPATH
   - if [[ $TRAVIS_PULL_REQUEST == "false" ]] && [[ $TRAVIS_BRANCH == "master" ]]; then docker login -u="$DOCKERHUB_LOGIN" -p="$DOCKERHUB_PASSWORD"; fi
   - if [[ $TRAVIS_PULL_REQUEST == "false" ]] && [[ $TRAVIS_BRANCH == "master" ]]; then make publish; fi

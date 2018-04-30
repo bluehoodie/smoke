@@ -33,6 +33,8 @@ type Contract struct {
 
 	Locals map[string]string `json:"locals" yaml:"locals"`
 
+	Outputs map[string]string `json:"outputs" yaml:"outputs"`
+
 	ExpectedHTTPCode     int    `json:"http_code_is" yaml:"http_code_is"`
 	ExpectedResponseBody string `json:"response_body_contains" yaml:"response_body_contains"`
 }
@@ -130,8 +132,20 @@ func (runner *Runner) validateContract(contract Contract) (err error) {
 		return
 	}
 
-	if err = validateResponseBody(contract, resp); err != nil {
-		return
+	if contract.ExpectedResponseBody != "" || (contract.Outputs != nil && len(contract.Outputs) > 0) {
+		body, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return err
+		}
+		defer resp.Body.Close()
+
+		if err = validateResponseBody(contract, body); err != nil {
+			return err
+		}
+
+		if err = parseOutputs(runner, &contract, body); err != nil {
+			return err
+		}
 	}
 
 	return
@@ -177,14 +191,8 @@ func validateHTTPCode(contract Contract, resp *http.Response) error {
 	return nil
 }
 
-func validateResponseBody(contract Contract, resp *http.Response) error {
+func validateResponseBody(contract Contract, body []byte) error {
 	if contract.ExpectedResponseBody != "" {
-		body, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			return fmt.Errorf("error reading response body: %v", err)
-		}
-		defer resp.Body.Close()
-
 		if !strings.Contains(string(body), contract.ExpectedResponseBody) {
 			return fmt.Errorf("expected response not found in the body")
 		}
