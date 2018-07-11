@@ -154,6 +154,13 @@
 
       "http_code_is": 200,
       "response_body_contains": "bar"
-    }     
+    },
+    {
+      "name": "httpbin_get_body_regexp",
+      "path": "/get?foo=12345!",
+      "method": "GET",
+
+      "response_body_contains": "r/[1-5]{5}"
+    }
   ]
 }

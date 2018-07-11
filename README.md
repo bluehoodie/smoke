@@ -52,7 +52,7 @@ The structure of a contract element is a map with the following elements:
 - `headers`: map of header values to add to the http request (optional)
 - `locals`: map of variables specific to this test case. will override the global values
 - `http_code_is`: integer representing the expected http code in the result
-- `response_body_contains`: string representing an expected value within the resulting response body 
+- `response_body_contains`: string representing an expected value within the resulting response body (Can be a regexp begining by r/ example "r/[0-9]*" )
 
 See the `smoke_test.json` and `smoke_test.yaml` files for examples. 
 

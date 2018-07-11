@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"regexp"
 	"strings"
 
 	"github.com/fatih/color"
@@ -193,9 +194,18 @@ func validateHTTPCode(contract Contract, resp *http.Response) error {
 
 func validateResponseBody(contract Contract, body []byte) error {
 	if contract.ExpectedResponseBody != "" {
-		if !strings.Contains(string(body), contract.ExpectedResponseBody) {
-			return fmt.Errorf("expected response not found in the body")
+		if !strings.HasPrefix(contract.ExpectedResponseBody, "r/") {
+			if !strings.Contains(string(body), contract.ExpectedResponseBody) {
+				return fmt.Errorf("expected response not found in the body")
+			}
+		} else {
+			expectedRegexp := contract.ExpectedResponseBody[2:]
+			re := regexp.MustCompile(expectedRegexp)
+			if !re.MatchString(string(body)) {
+				return fmt.Errorf("expected regexp not found in the body")
+			}
 		}
+
 	}
 
 	return nil
