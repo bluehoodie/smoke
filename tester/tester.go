@@ -199,7 +199,7 @@ func validateResponseBody(contract Contract, body []byte) error {
 			expectedRegexp := contract.ExpectedResponseBody[2:]
 			re, err := regexp.Compile(expectedRegexp)
 			if err == nil {
-				if !re.MatchString(string(body)) {
+				if !re.Match(body) {
 					return fmt.Errorf("expected regexp not found in the body")
 				}
 				return nil
