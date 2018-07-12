@@ -1,11 +1,13 @@
 package tester
 
 import (
+	"bytes"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"os"
+	"regexp"
 	"strings"
 
 	"github.com/fatih/color"
@@ -193,9 +195,21 @@ func validateHTTPCode(contract Contract, resp *http.Response) error {
 
 func validateResponseBody(contract Contract, body []byte) error {
 	if contract.ExpectedResponseBody != "" {
-		if !strings.Contains(string(body), contract.ExpectedResponseBody) {
+		if strings.HasPrefix(contract.ExpectedResponseBody, "r/") {
+			expectedRegexp := contract.ExpectedResponseBody[2:]
+			re, err := regexp.Compile(expectedRegexp)
+			if err == nil {
+				if !re.Match(body) {
+					return fmt.Errorf("expected regexp not found in the body")
+				}
+				return nil
+			}
+		}
+
+		if !bytes.Contains(body, []byte(contract.ExpectedResponseBody)) {
 			return fmt.Errorf("expected response not found in the body")
 		}
+
 	}
 
 	return nil
