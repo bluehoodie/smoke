@@ -194,22 +194,23 @@ func validateHTTPCode(contract Contract, resp *http.Response) error {
 }
 
 func validateResponseBody(contract Contract, body []byte) error {
-	if contract.ExpectedResponseBody != "" {
-		if strings.HasPrefix(contract.ExpectedResponseBody, "r/") {
-			expectedRegexp := contract.ExpectedResponseBody[2:]
-			re, err := regexp.Compile(expectedRegexp)
-			if err == nil {
-				if !re.Match(body) {
-					return fmt.Errorf("expected regexp not found in the body")
-				}
-				return nil
+	if contract.ExpectedResponseBody == "" {
+		return nil
+	}
+
+	if strings.HasPrefix(contract.ExpectedResponseBody, "r/") {
+		expectedRegexp := contract.ExpectedResponseBody[2:]
+		re, err := regexp.Compile(expectedRegexp)
+		if err == nil {
+			if !re.Match(body) {
+				return fmt.Errorf("regular expression did not find any matches in the response body")
 			}
+			return nil
 		}
+	}
 
-		if !bytes.Contains(body, []byte(contract.ExpectedResponseBody)) {
-			return fmt.Errorf("expected response not found in the body")
-		}
-
+	if !bytes.Contains(body, []byte(contract.ExpectedResponseBody)) {
+		return fmt.Errorf("expected response not found in the body")
 	}
 
 	return nil
