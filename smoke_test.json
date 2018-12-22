@@ -168,6 +168,20 @@
       "method": "GET",
 
       "response_body_contains": "r/[1-a{5}"
+    },
+    {
+      "name": "httpbin_verify_response_header",
+      "path": "/response-headers?My-Header=found",
+      "method": "GET",
+
+      "response_headers_is": {"My-Header": "found"}
+    },
+    {
+      "name": "httpbin_verify_many_response_header",
+      "path": "/response-headers?My-Header=found&My-Header2=foundToo",
+      "method": "GET",
+
+      "response_headers_is": {"My-Header": "found", "My-Header2": "foundToo"}
     }
   ]
 }

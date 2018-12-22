@@ -37,8 +37,9 @@ type Contract struct {
 
 	Outputs map[string]string `json:"outputs" yaml:"outputs"`
 
-	ExpectedHTTPCode     int    `json:"http_code_is" yaml:"http_code_is"`
-	ExpectedResponseBody string `json:"response_body_contains" yaml:"response_body_contains"`
+	ExpectedHTTPCode     int               `json:"http_code_is" yaml:"http_code_is"`
+	ExpectedResponseBody string            `json:"response_body_contains" yaml:"response_body_contains"`
+	ExpectedHeaders      map[string]string `json:"response_headers_is" yaml:"response_headers_is"`
 }
 
 // Test represents the data for a full test suite
@@ -134,6 +135,12 @@ func (runner *Runner) validateContract(contract Contract) (err error) {
 		return
 	}
 
+	if len(contract.ExpectedHeaders) > 0 {
+		if err = validateHeaders(contract, resp); err != nil {
+			return
+		}
+	}
+
 	if contract.ExpectedResponseBody != "" || (contract.Outputs != nil && len(contract.Outputs) > 0) {
 		body, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
@@ -211,6 +218,21 @@ func validateResponseBody(contract Contract, body []byte) error {
 
 	if !bytes.Contains(body, []byte(contract.ExpectedResponseBody)) {
 		return fmt.Errorf("expected response not found in the body")
+	}
+
+	return nil
+}
+
+func validateHeaders(contract Contract, resp *http.Response) error {
+	for k, v := range contract.ExpectedHeaders {
+		if val, ok := resp.Header[k]; ok && len(val) > 0 {
+			if v != val[0] {
+				return fmt.Errorf("expected header %s value %s got %s ", k, v, val[0])
+			}
+		} else {
+			return fmt.Errorf("expected header %s not found in the response", k)
+		}
+
 	}
 
 	return nil
