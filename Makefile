@@ -1,4 +1,4 @@
-.PHONY: install dep container publish binary httpbin-container httpbin-publish smoke-test
+.PHONY: install dep container publish binary httpbin-container httpbin-publish test
 
 install:
 	go build -o ${GOPATH}/bin/smoke main.go
@@ -21,6 +21,6 @@ httpbin-container:
 httpbin-publish: httpbin-container
 	docker push bluehoodie/httpbin
 
-smoke-test: install
+test: install
 	ENVTOKEN=token235 smoke -f ./smoke_test.json -u https://httpbin.org -v
 	ENVTOKEN=token235 smoke -f ./smoke_test.yaml -u https://httpbin.org -v
