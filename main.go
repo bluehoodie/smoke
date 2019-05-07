@@ -43,6 +43,8 @@ func main() {
 		os.Exit(2)
 	}
 
+	prepareResponseBody(&t)
+
 	url := opts.URL
 	if opts.Port != 0 {
 		url = fmt.Sprintf("%s:%d", url, opts.Port)
@@ -80,4 +82,15 @@ func unmarshal(filename string, in []byte, out interface{}) error {
 	}
 
 	return unmarshalError
+}
+
+// In order to keep retro compatibility with ExpectedResponseBody, and at the same time introducing multiple response check with ExpectedResponse
+func prepareResponseBody(t *tester.Test) {
+	if t != nil && t.Contracts != nil && len(t.Contracts) > 0 {
+		for _, c := range t.Contracts {
+			if c.ExpectedResponseBody != "" {
+				c.ExpectedResponses = append(c.ExpectedResponses, c.ExpectedResponseBody)
+			}
+		}
+	}
 }
