@@ -89,7 +89,7 @@ func prepareResponseBody(t *tester.Test) {
 	if t != nil && t.Contracts != nil && len(t.Contracts) > 0 {
 		for _, c := range t.Contracts {
 			if c.ExpectedResponseBody != "" {
-				c.ExpectedResponse = append(c.ExpectedResponse, c.ExpectedResponseBody)
+				c.ExpectedResponses = append(c.ExpectedResponses, c.ExpectedResponseBody)
 			}
 		}
 	}

@@ -39,7 +39,7 @@ type Contract struct {
 
 	ExpectedHTTPCode     int               `json:"http_code_is" yaml:"http_code_is"`
 	ExpectedResponseBody string            `json:"response_body_contains" yaml:"response_body_contains"`
-	ExpectedResponse     []string 		   `json:"response_contains" yaml:"response_contains"`
+	ExpectedResponses    []string 		   `json:"response_contains" yaml:"response_contains"`
 	ExpectedHeaders      map[string]string `json:"response_headers_is" yaml:"response_headers_is"`
 }
 
@@ -143,7 +143,7 @@ func (runner *Runner) validateContract(contract Contract) (err error) {
 		}
 	}
 
-	if len(contract.ExpectedResponse) > 0 || (contract.Outputs != nil && len(contract.Outputs) > 0) {
+	if len(contract.ExpectedResponses) > 0 || (contract.Outputs != nil && len(contract.Outputs) > 0) {
 		body, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
 			return err
@@ -203,11 +203,11 @@ func validateHTTPCode(contract Contract, resp *http.Response) error {
 }
 
 func validateResponseBody(contract Contract, body []byte) error {
-	if len(contract.ExpectedResponse) == 0 {
+	if len(contract.ExpectedResponses) == 0 {
 		return nil
 	}
 	
-	for _, r := range contract.ExpectedResponse {
+	for _, r := range contract.ExpectedResponses {
 		// check if it is a regexp
 		if strings.HasPrefix(r, "r/") {
 			expectedRegexp := r[2:]
