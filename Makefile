@@ -22,9 +22,5 @@ httpbin-publish: httpbin-container
 	docker push bluehoodie/httpbin
 
 smoke-test: install
-	-docker stop httpbin
-	docker run -d -p 8000:8000 --rm --name httpbin bluehoodie/httpbin
-	sleep 5
-	ENVTOKEN=token235 smoke -f ./smoke_test.json -u http://localhost -p 8000 -v
-	ENVTOKEN=token235 smoke -f ./smoke_test.yaml -u http://localhost -p 8000 -v
-	docker stop httpbin
+	ENVTOKEN=token235 smoke -f ./smoke_test.json -u https://httpbin.org -v
+	ENVTOKEN=token235 smoke -f ./smoke_test.yaml -u https://httpbin.org -v
