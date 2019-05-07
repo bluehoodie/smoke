@@ -39,8 +39,10 @@ type Contract struct {
 
 	ExpectedHTTPCode     int               `json:"http_code_is" yaml:"http_code_is"`
 	ExpectedResponseBody string            `json:"response_body_contains" yaml:"response_body_contains"`
+	ExpectedResponse     []string 		   `json:"response_contains" yaml:"response_contains"`
 	ExpectedHeaders      map[string]string `json:"response_headers_is" yaml:"response_headers_is"`
 }
+
 
 // Test represents the data for a full test suite
 type Test struct {
@@ -141,7 +143,7 @@ func (runner *Runner) validateContract(contract Contract) (err error) {
 		}
 	}
 
-	if contract.ExpectedResponseBody != "" || (contract.Outputs != nil && len(contract.Outputs) > 0) {
+	if len(contract.ExpectedResponse) > 0 || (contract.Outputs != nil && len(contract.Outputs) > 0) {
 		body, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
 			return err
@@ -201,25 +203,25 @@ func validateHTTPCode(contract Contract, resp *http.Response) error {
 }
 
 func validateResponseBody(contract Contract, body []byte) error {
-	if contract.ExpectedResponseBody == "" {
+	if len(contract.ExpectedResponse) == 0 {
 		return nil
 	}
-
-	if strings.HasPrefix(contract.ExpectedResponseBody, "r/") {
-		expectedRegexp := contract.ExpectedResponseBody[2:]
-		re, err := regexp.Compile(expectedRegexp)
-		if err == nil {
-			if !re.Match(body) {
-				return fmt.Errorf("regular expression did not find any matches in the response body")
+	
+	for _, r := range contract.ExpectedResponse {
+		// check if it is a regexp
+		if strings.HasPrefix(r, "r/") {
+			expectedRegexp := r[2:]
+			re, err := regexp.Compile(expectedRegexp)
+			if err == nil {
+				if !re.Match(body) {
+					return fmt.Errorf("regular expression did not find any matches in the response body")
+				}
 			}
-			return nil
+		} else if !bytes.Contains(body, []byte(r)) {
+			return fmt.Errorf("expected response not found in the body")
 		}
 	}
-
-	if !bytes.Contains(body, []byte(contract.ExpectedResponseBody)) {
-		return fmt.Errorf("expected response not found in the body")
-	}
-
+	
 	return nil
 }
 

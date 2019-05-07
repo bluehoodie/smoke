@@ -164,3 +164,22 @@ contracts:
   response_headers_is: 
     My-Header: "found"
     My-Header2: "foundToo"
+
+- name: httpbin_get_body_multiple
+  path: "/get?foo=hello!"
+  method: GET
+
+  response_body_contains: hello
+  response_contains:
+    - foo
+    - !
+
+- name: httpbin_get_response_multiple
+  path: "/get?foo=hello!"
+  method: GET
+
+  response_contains:
+    - hello
+    - foo
+    - !
+
