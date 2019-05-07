@@ -10,10 +10,10 @@ contracts:
   http_code_is: 200
 
 - name: httpbin_status_code_check
-  path: "/status/123"
+  path: "/status/418"
   method: GET
 
-  http_code_is: 123
+  http_code_is: 418
 
 - name: httpbin_get_body
   path: "/get?foo=hello!"
