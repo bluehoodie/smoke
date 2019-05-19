@@ -178,10 +178,10 @@
     },
     {
       "name": "httpbin_verify_many_response_header",
-      "path": "/response-headers?My-Header=found&My-Header2=foundToo",
+      "path": "/response-headers?My-Header=found&My-Header2=notImportant&My-Header3=12345!",
       "method": "GET",
 
-      "response_headers_contain": {"My-Header": "found", "My-Header2": ""}
+      "response_headers_contain": {"My-Header": "found", "My-Header2": "", "My-Header3": "r/[1-5]{5}"}
     },
     {
       "name": "httpbin_get_body_multiple",
