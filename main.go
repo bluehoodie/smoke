@@ -2,12 +2,13 @@ package main
 
 import (
 	"fmt"
-	"github.com/jessevdk/go-flags"
 	"net/http"
 	"os"
 	"time"
 
 	"github.com/bluehoodie/smoke/internal/tester"
+
+	"github.com/jessevdk/go-flags"
 )
 
 var opts struct {
