@@ -62,7 +62,7 @@ func NewTest(inputFile string) (*Test, error) {
 
 	t := Test{}
 	if err := unmarshal(inputFile, data, &t); err != nil {
-		return nil, errors.Wrapf(err, "could not unmarshal test data", inputFile)
+		return nil, errors.Wrap(err, "could not unmarshal test data")
 	}
 
 	t.init()

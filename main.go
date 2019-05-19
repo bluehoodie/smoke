@@ -22,6 +22,7 @@ var opts struct {
 func init() {
 	_, err := flags.Parse(&opts)
 	if err != nil {
+		fmt.Fprintf(os.Stderr, err.Error())
 		os.Exit(2)
 	}
 }
