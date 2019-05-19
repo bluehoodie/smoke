@@ -11,7 +11,7 @@ A simple application to write and run smoke tests for RESTful APIs.
 
 The most convenient way of running this code, especially in a CI environment, is to use the docker image `bluehoodie/smoke`
 
-`docker run -v {YOUR_TESTFILE_LOCATION}:/test bluehoodie/smoke -f /test/{YOUR_TESTFILE} -u http://{YOUR_URL}`
+`docker run -v {YOUR_TESTFILE_LOCATION}:/test bluehoodie/smoke{:VERSION} -f /test/{YOUR_TESTFILE} -u http://{YOUR_URL}`
 
 ### Usage
 
