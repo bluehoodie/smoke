@@ -1,6 +1,7 @@
 package tester
 
 import (
+	"github.com/bluehoodie/smoke/internal"
 	"os"
 	"testing"
 
@@ -58,7 +59,7 @@ var extractmaptt = []struct {
 func TestExtractValueFromJSONMap(t *testing.T) {
 	for _, tt := range extractmaptt {
 		//act
-		result := extractValueFromJSONMap(tt.key, tt.m)
+		result := internal.extractValueFromJSONMap(tt.key, tt.m)
 
 		//arrange
 		assert.Equal(t, tt.expected, result, tt.description)
@@ -182,7 +183,7 @@ var jsonParsertt = []struct {
 func TestJsonParser(t *testing.T) {
 	for _, tt := range jsonParsertt {
 		//act
-		v, err := jsonParser(tt.conf, tt.keys, []byte(tt.json))
+		v, err := internal.jsonParser(tt.conf, tt.keys, []byte(tt.json))
 
 		//assert
 		assert.True(t, (err != nil) == tt.expectedError, tt.description)
@@ -221,7 +222,7 @@ var extractarraytt = []struct {
 func TestExtractValueFromJSONArray(t *testing.T) {
 	for _, tt := range extractarraytt {
 		//act
-		v := extractValueFromJSONArray(tt.key, tt.arr)
+		v := internal.extractValueFromJSONArray(tt.key, tt.arr)
 
 		//assert
 		assert.Equal(t, tt.expected, v, tt.description)
@@ -229,8 +230,8 @@ func TestExtractValueFromJSONArray(t *testing.T) {
 }
 
 var parseOtt = []struct {
-	runner        *Runner
-	contract      *Contract
+	runner        *internal.Runner
+	contract      *internal.Contract
 	body          []byte
 	description   string
 	err           bool
@@ -238,24 +239,24 @@ var parseOtt = []struct {
 	expectedValue string
 }{
 	{
-		contract: &Contract{
+		contract: &internal.Contract{
 			Outputs: make(map[string]string),
 		},
 		err:         false,
 		description: "It should not return an error if there are no outputs",
 	},
 	{
-		contract: &Contract{
+		contract: &internal.Contract{
 			Outputs: map[string]string{"value": "NOT_MAPPED.whatever"},
 		},
 		err:         true,
 		description: "It should return an error if there are outputs that does not begin by what is expected (JSON)",
 	},
 	{
-		contract: &Contract{
+		contract: &internal.Contract{
 			Outputs: map[string]string{"value": "JSON.A"},
 		},
-		runner:        &Runner{test: Test{Globals: make(map[string]string)}},
+		runner:        &internal.Runner{test: internal.Test{Globals: make(map[string]string)}},
 		body:          []byte(`{"A": 1 }`),
 		err:           false,
 		expectedKey:   "value",
@@ -263,10 +264,10 @@ var parseOtt = []struct {
 		description:   "Runner should have an value as output",
 	},
 	{
-		contract: &Contract{
+		contract: &internal.Contract{
 			Outputs: map[string]string{"value": "JSON.A"},
 		},
-		runner:      &Runner{test: Test{Globals: make(map[string]string)}},
+		runner:      &internal.Runner{test: internal.Test{Globals: make(map[string]string)}},
 		body:        []byte(`OBVIOUSLY NOT A JSON`),
 		err:         true,
 		description: "It should return an error if the body does not match with what is exected",
@@ -276,7 +277,7 @@ var parseOtt = []struct {
 func TestParseOutputs(t *testing.T) {
 	for _, tt := range parseOtt {
 		//act
-		err := parseOutputs(tt.runner, tt.contract, tt.body)
+		err := internal.parseOutputs(tt.runner, tt.contract, tt.body)
 
 		//assert
 		assert.True(t, (err != nil) == tt.err, tt.description)
@@ -292,8 +293,8 @@ func TestParseOutputs(t *testing.T) {
 
 var replaceVartt = []struct {
 	s           string
-	contract    *Contract
-	runner      *Runner
+	contract    *internal.Contract
+	runner      *internal.Runner
 	env         map[string]string
 	err         bool
 	expected    string
@@ -308,32 +309,32 @@ var replaceVartt = []struct {
 	{
 		s:           "::local::",
 		err:         false,
-		contract:    &Contract{Locals: map[string]string{"local": "1"}},
-		runner:      &Runner{test: Test{Globals: map[string]string{}}},
+		contract:    &internal.Contract{Locals: map[string]string{"local": "1"}},
+		runner:      &internal.Runner{test: internal.Test{Globals: map[string]string{}}},
 		expected:    "1",
 		description: "If should replace the input value by the local one",
 	},
 	{
 		s:           "::global::",
 		err:         false,
-		contract:    &Contract{Locals: map[string]string{}},
-		runner:      &Runner{test: Test{Globals: map[string]string{"global": "1"}}},
+		contract:    &internal.Contract{Locals: map[string]string{}},
+		runner:      &internal.Runner{test: internal.Test{Globals: map[string]string{"global": "1"}}},
 		expected:    "1",
 		description: "If should replace the input value by the global one",
 	},
 	{
 		s:           "::env::",
 		err:         false,
-		contract:    &Contract{Locals: map[string]string{}},
-		runner:      &Runner{test: Test{Globals: map[string]string{}}},
+		contract:    &internal.Contract{Locals: map[string]string{}},
+		runner:      &internal.Runner{test: internal.Test{Globals: map[string]string{}}},
 		env:         map[string]string{"ENV": "1"},
 		expected:    "1",
 		description: "If should replace the input value by the env one",
 	},
 	{
 		s:           "::not_found::",
-		contract:    &Contract{Locals: map[string]string{}},
-		runner:      &Runner{test: Test{Globals: map[string]string{}}},
+		contract:    &internal.Contract{Locals: map[string]string{}},
+		runner:      &internal.Runner{test: internal.Test{Globals: map[string]string{}}},
 		expected:    "::not_found::",
 		err:         true,
 		description: "If should send an error if the value is not on local, global neither env variables",
@@ -341,8 +342,8 @@ var replaceVartt = []struct {
 	{
 		s:           "::local::_::global::_::env::",
 		err:         false,
-		contract:    &Contract{Locals: map[string]string{"local": "1"}},
-		runner:      &Runner{test: Test{Globals: map[string]string{"global": "2"}}},
+		contract:    &internal.Contract{Locals: map[string]string{"local": "1"}},
+		runner:      &internal.Runner{test: internal.Test{Globals: map[string]string{"global": "2"}}},
 		env:         map[string]string{"ENV": "3"},
 		expected:    "1_2_3",
 		description: "If should replace all the values if there are many ",
@@ -360,7 +361,7 @@ func TestReplaceVariables(t *testing.T) {
 		}
 
 		//act
-		s, err := replaceVariables(tt.runner, tt.contract, tt.s)
+		s, err := internal.replaceVariables(tt.runner, tt.contract, tt.s)
 
 		//assert
 		assert.True(t, (err != nil) == tt.err, tt.description)

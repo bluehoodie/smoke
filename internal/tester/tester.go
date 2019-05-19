@@ -39,16 +39,29 @@ type Contract struct {
 
 	ExpectedHTTPCode     int               `json:"http_code_is" yaml:"http_code_is"`
 	ExpectedResponseBody string            `json:"response_body_contains" yaml:"response_body_contains"`
-	ExpectedResponses    []string 		   `json:"response_contains" yaml:"response_contains"`
+	ExpectedResponses    []string          `json:"response_contains" yaml:"response_contains"`
 	ExpectedHeaders      map[string]string `json:"response_headers_is" yaml:"response_headers_is"`
 }
-
 
 // Test represents the data for a full test suite
 type Test struct {
 	Globals map[string]string `json:"globals" yaml:"globals"`
 
 	Contracts []Contract `json:"contracts" yaml:"contracts"`
+}
+
+func (t *Test) Init() {
+	if t == nil || len(t.Contracts) == 0 {
+		return
+	}
+
+	for _, c := range t.Contracts {
+		if c.ExpectedResponseBody == "" {
+			continue
+		}
+
+		c.ExpectedResponses = append(c.ExpectedResponses, c.ExpectedResponseBody)
+	}
 }
 
 // Runner is the primary struct of this package and is responsible for running the test suite
@@ -206,7 +219,7 @@ func validateResponseBody(contract Contract, body []byte) error {
 	if len(contract.ExpectedResponses) == 0 {
 		return nil
 	}
-	
+
 	for _, r := range contract.ExpectedResponses {
 		// check if it is a regexp
 		if strings.HasPrefix(r, "r/") {
@@ -221,7 +234,7 @@ func validateResponseBody(contract Contract, body []byte) error {
 			return fmt.Errorf("expected response not found in the body")
 		}
 	}
-	
+
 	return nil
 }
 
