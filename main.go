@@ -2,13 +2,12 @@ package main
 
 import (
 	"fmt"
+	"github.com/jessevdk/go-flags"
 	"net/http"
 	"os"
 	"time"
 
 	"github.com/bluehoodie/smoke/internal/tester"
-
-	"github.com/jessevdk/go-flags"
 )
 
 var opts struct {
@@ -19,15 +18,13 @@ var opts struct {
 	Timeout int    `short:"t" long:"timeout" default:"1" description:"timeout in seconds for each http request made"`
 }
 
-func init() {
+func main() {
 	_, err := flags.Parse(&opts)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, err.Error())
 		os.Exit(2)
 	}
-}
 
-func main() {
 	t, err := tester.NewTest(opts.File)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, err.Error())
