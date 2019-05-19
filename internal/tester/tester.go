@@ -49,9 +49,8 @@ type Contract struct {
 
 // Test represents the data for a full test suite
 type Test struct {
-	Globals map[string]string `json:"globals" yaml:"globals"`
-
-	Contracts []Contract `json:"contracts" yaml:"contracts"`
+	Globals   map[string]string `json:"globals" yaml:"globals"`
+	Contracts []Contract        `json:"contracts" yaml:"contracts"`
 }
 
 func NewTest(inputFile string) (*Test, error) {
