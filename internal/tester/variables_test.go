@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var extractmaptt = []struct {
+var mapExtractTests = []struct {
 	m           map[string]interface{}
 	key         string
 	expected    interface{}
@@ -32,7 +32,7 @@ var extractmaptt = []struct {
 		expected:    nil,
 	},
 	{
-		description: "should send nil if there is no number formated string between [] on the key",
+		description: "should send nil if there is no number formatted string between [] on the key",
 		m:           make(map[string]interface{}),
 		key:         "param[abc]",
 		expected:    nil,
@@ -56,16 +56,14 @@ var extractmaptt = []struct {
 }
 
 func TestExtractValueFromJSONMap(t *testing.T) {
-	for _, tt := range extractmaptt {
-		//act
+	for _, tt := range mapExtractTests {
 		result := extractValueFromJSONMap(tt.key, tt.m)
 
-		//arrange
 		assert.Equal(t, tt.expected, result, tt.description)
 	}
 }
 
-var jsonParsertt = []struct {
+var jsonParserTests = []struct {
 	json          string
 	conf          string
 	keys          []string
@@ -74,7 +72,7 @@ var jsonParsertt = []struct {
 	description   string
 }{
 	{
-		description:   "should have an error when no field parameter",
+		description:   "should have an error when no field parameter is defined",
 		conf:          "A",
 		keys:          []string{},
 		json:          `{ "A":1 }`,
@@ -90,7 +88,7 @@ var jsonParsertt = []struct {
 		expectedValue: "",
 	},
 	{
-		description:   "should have an error when no body parameter",
+		description:   "should have an error when no body parameter is defined",
 		conf:          "A",
 		keys:          []string{"A"},
 		json:          "",
@@ -98,7 +96,7 @@ var jsonParsertt = []struct {
 		expectedValue: "",
 	},
 	{
-		description:   "should have an error when no json",
+		description:   "should have an error when no json is defined",
 		json:          "Hello World",
 		conf:          "A",
 		keys:          []string{"A"},
@@ -106,7 +104,7 @@ var jsonParsertt = []struct {
 		expectedValue: "",
 	},
 	{
-		description:   "should have an error when value is not present in the middle of the json",
+		description:   "should have an error when value is not present in the json",
 		conf:          "C.D",
 		keys:          []string{"C", "D"},
 		json:          `{ "A": { "B": 1 } }`,
@@ -122,7 +120,7 @@ var jsonParsertt = []struct {
 		expectedValue: "",
 	},
 	{
-		description:   "should works when the format is A",
+		description:   "should work when the format is A",
 		conf:          "A",
 		keys:          []string{"A"},
 		json:          `{ "A":1 }`,
@@ -130,7 +128,7 @@ var jsonParsertt = []struct {
 		expectedValue: "1",
 	},
 	{
-		description:   "should works when the format is A.B",
+		description:   "should work when the format is A.B",
 		conf:          "A.B",
 		keys:          []string{"A", "B"},
 		json:          `{ "A": { "B": 1 } }`,
@@ -138,7 +136,7 @@ var jsonParsertt = []struct {
 		expectedValue: "1",
 	},
 	{
-		description:   "should works when the format is A.B[0]",
+		description:   "should work when the format is A.B[0]",
 		conf:          "A.B[0]",
 		keys:          []string{"A", "B[0]"},
 		json:          `{ "A": { "B": [1,2,3] } }`,
@@ -146,7 +144,7 @@ var jsonParsertt = []struct {
 		expectedValue: "1",
 	},
 	{
-		description:   "should works when the format is A.B[1].C",
+		description:   "should work when the format is A.B[1].C",
 		conf:          "A.B[1].C",
 		keys:          []string{"A", "B[1]", "C"},
 		json:          `{ "A": { "B": [{"C":1},{"C":2}] } }`,
@@ -154,7 +152,7 @@ var jsonParsertt = []struct {
 		expectedValue: "2",
 	},
 	{
-		description:   "should works when the format is [2]",
+		description:   "should work when the format is [2]",
 		conf:          "[2]",
 		keys:          []string{"[2]"},
 		json:          `[1,2,3]`,
@@ -162,7 +160,7 @@ var jsonParsertt = []struct {
 		expectedValue: "3",
 	},
 	{
-		description:   "should works when the format is [0].A",
+		description:   "should work when the format is [0].A",
 		conf:          "[0].A",
 		keys:          []string{"[0]", "A"},
 		json:          `[ {"A":1}, {"A":2} ]`,
@@ -180,17 +178,15 @@ var jsonParsertt = []struct {
 }
 
 func TestJsonParser(t *testing.T) {
-	for _, tt := range jsonParsertt {
-		//act
-		v, err := jsonParser(tt.conf, tt.keys, []byte(tt.json))
+	for _, tt := range jsonParserTests {
+		v, err := parseJSON(tt.conf, tt.keys, []byte(tt.json))
 
-		//assert
 		assert.True(t, (err != nil) == tt.expectedError, tt.description)
 		assert.Equal(t, tt.expectedValue, v, tt.description)
 	}
 }
 
-var extractarraytt = []struct {
+var arrayExtractTests = []struct {
 	key         string
 	arr         []interface{}
 	expected    interface{}
@@ -209,7 +205,7 @@ var extractarraytt = []struct {
 		expected:    nil,
 	},
 	{
-		description: "should works when all is correct",
+		description: "should work when all is correct",
 		key:         "[0]",
 		arr: []interface{}{
 			"Hello",
@@ -219,11 +215,9 @@ var extractarraytt = []struct {
 }
 
 func TestExtractValueFromJSONArray(t *testing.T) {
-	for _, tt := range extractarraytt {
-		//act
+	for _, tt := range arrayExtractTests {
 		v := extractValueFromJSONArray(tt.key, tt.arr)
 
-		//assert
 		assert.Equal(t, tt.expected, v, tt.description)
 	}
 }
@@ -242,43 +236,41 @@ var parseOtt = []struct {
 			Outputs: make(map[string]string),
 		},
 		err:         false,
-		description: "It should not return an error if there are no outputs",
+		description: "should not return an error if there are no outputs",
 	},
 	{
 		contract: &Contract{
 			Outputs: map[string]string{"value": "NOT_MAPPED.whatever"},
 		},
 		err:         true,
-		description: "It should return an error if there are outputs that does not begin by what is expected (JSON)",
+		description: "should return an error if there are outputs that does not begin by what is expected (JSON)",
 	},
 	{
 		contract: &Contract{
 			Outputs: map[string]string{"value": "JSON.A"},
 		},
-		runner:        &Runner{test: Test{Globals: make(map[string]string)}},
+		runner:        &Runner{test: &Test{Globals: make(map[string]string)}},
 		body:          []byte(`{"A": 1 }`),
 		err:           false,
 		expectedKey:   "value",
 		expectedValue: "1",
-		description:   "Runner should have an value as output",
+		description:   "runner should have an value as output",
 	},
 	{
 		contract: &Contract{
 			Outputs: map[string]string{"value": "JSON.A"},
 		},
-		runner:      &Runner{test: Test{Globals: make(map[string]string)}},
+		runner:      &Runner{test: &Test{Globals: make(map[string]string)}},
 		body:        []byte(`OBVIOUSLY NOT A JSON`),
 		err:         true,
-		description: "It should return an error if the body does not match with what is exected",
+		description: "should return an error if the body does not match with what is expected",
 	},
 }
 
 func TestParseOutputs(t *testing.T) {
 	for _, tt := range parseOtt {
-		//act
 		err := parseOutputs(tt.runner, tt.contract, tt.body)
 
-		//assert
 		assert.True(t, (err != nil) == tt.err, tt.description)
 
 		if tt.expectedKey != "" && err == nil {
@@ -290,7 +282,7 @@ func TestParseOutputs(t *testing.T) {
 
 }
 
-var replaceVartt = []struct {
+var variableReplacementTests = []struct {
 	s           string
 	contract    *Contract
 	runner      *Runner
@@ -303,55 +295,54 @@ var replaceVartt = []struct {
 		s:           "NO PATTERN",
 		err:         false,
 		expected:    "NO PATTERN",
-		description: "If there are no value to replace it should return the string in output",
+		description: "should return the string in output",
 	},
 	{
 		s:           "::local::",
 		err:         false,
 		contract:    &Contract{Locals: map[string]string{"local": "1"}},
-		runner:      &Runner{test: Test{Globals: map[string]string{}}},
+		runner:      &Runner{test: &Test{Globals: map[string]string{}}},
 		expected:    "1",
-		description: "If should replace the input value by the local one",
+		description: "should replace the input value by the local one",
 	},
 	{
 		s:           "::global::",
 		err:         false,
 		contract:    &Contract{Locals: map[string]string{}},
-		runner:      &Runner{test: Test{Globals: map[string]string{"global": "1"}}},
+		runner:      &Runner{test: &Test{Globals: map[string]string{"global": "1"}}},
 		expected:    "1",
-		description: "If should replace the input value by the global one",
+		description: "should replace the input value by the global one",
 	},
 	{
 		s:           "::env::",
 		err:         false,
 		contract:    &Contract{Locals: map[string]string{}},
-		runner:      &Runner{test: Test{Globals: map[string]string{}}},
+		runner:      &Runner{test: &Test{Globals: map[string]string{}}},
 		env:         map[string]string{"ENV": "1"},
 		expected:    "1",
-		description: "If should replace the input value by the env one",
+		description: "should replace the input value by the env one",
 	},
 	{
 		s:           "::not_found::",
 		contract:    &Contract{Locals: map[string]string{}},
-		runner:      &Runner{test: Test{Globals: map[string]string{}}},
+		runner:      &Runner{test: &Test{Globals: map[string]string{}}},
 		expected:    "::not_found::",
 		err:         true,
-		description: "If should send an error if the value is not on local, global neither env variables",
+		description: "should send an error if the value is not on local, global neither env variables",
 	},
 	{
 		s:           "::local::_::global::_::env::",
 		err:         false,
 		contract:    &Contract{Locals: map[string]string{"local": "1"}},
-		runner:      &Runner{test: Test{Globals: map[string]string{"global": "2"}}},
+		runner:      &Runner{test: &Test{Globals: map[string]string{"global": "2"}}},
 		env:         map[string]string{"ENV": "3"},
 		expected:    "1_2_3",
-		description: "If should replace all the values if there are many ",
+		description: "should replace all the values if there are many ",
 	},
 }
 
 func TestReplaceVariables(t *testing.T) {
-	for _, tt := range replaceVartt {
-		//arrange
+	for _, tt := range variableReplacementTests {
 		if tt.env != nil && len(tt.env) > 0 {
 			// Define env variables
 			for key, value := range tt.env {
@@ -359,10 +350,8 @@ func TestReplaceVariables(t *testing.T) {
 			}
 		}
 
-		//act
 		s, err := replaceVariables(tt.runner, tt.contract, tt.s)
 
-		//assert
 		assert.True(t, (err != nil) == tt.err, tt.description)
 		assert.Equal(t, tt.expected, s, tt.description)
 	}

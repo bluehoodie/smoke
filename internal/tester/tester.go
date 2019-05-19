@@ -2,11 +2,15 @@ package tester
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
+	"github.com/pkg/errors"
+	"gopkg.in/yaml.v2"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"os"
+	"path"
 	"regexp"
 	"strings"
 
@@ -39,16 +43,45 @@ type Contract struct {
 
 	ExpectedHTTPCode     int               `json:"http_code_is" yaml:"http_code_is"`
 	ExpectedResponseBody string            `json:"response_body_contains" yaml:"response_body_contains"`
-	ExpectedResponses    []string 		   `json:"response_contains" yaml:"response_contains"`
+	ExpectedResponses    []string          `json:"response_contains" yaml:"response_contains"`
 	ExpectedHeaders      map[string]string `json:"response_headers_is" yaml:"response_headers_is"`
 }
 
-
 // Test represents the data for a full test suite
 type Test struct {
-	Globals map[string]string `json:"globals" yaml:"globals"`
+	Globals   map[string]string `json:"globals" yaml:"globals"`
+	Contracts []Contract        `json:"contracts" yaml:"contracts"`
+}
 
-	Contracts []Contract `json:"contracts" yaml:"contracts"`
+// NewTest returns an initialized *Test and any error encountered along the way
+func NewTest(inputFile string) (*Test, error) {
+	data, err := ioutil.ReadFile(inputFile)
+	if err != nil {
+		return nil, errors.Wrapf(err, "could not read test file %v", inputFile)
+	}
+
+	t := Test{}
+	if err := unmarshal(inputFile, data, &t); err != nil {
+		return nil, errors.Wrap(err, "could not unmarshal test data")
+	}
+
+	t.init()
+
+	return &t, nil
+}
+
+func (t *Test) init() {
+	if t == nil || len(t.Contracts) == 0 {
+		return
+	}
+
+	for _, c := range t.Contracts {
+		if c.ExpectedResponseBody == "" {
+			continue
+		}
+
+		c.ExpectedResponses = append(c.ExpectedResponses, c.ExpectedResponseBody)
+	}
 }
 
 // Runner is the primary struct of this package and is responsible for running the test suite
@@ -58,7 +91,7 @@ type Runner struct {
 
 	client *http.Client
 
-	test Test
+	test *Test
 	url  string
 }
 
@@ -83,7 +116,7 @@ func WithHTTPClient(client *http.Client) Option {
 }
 
 // NewRunner returns a *Runner for a given url and Test.
-func NewRunner(url string, test Test, opts ...Option) *Runner {
+func NewRunner(url string, test *Test, opts ...Option) *Runner {
 	runner := &Runner{
 		url:  url,
 		test: test,
@@ -172,8 +205,8 @@ func failure(out io.Writer, name, format string, args ...interface{}) {
 
 func createAndSendRequest(contract Contract, url string, client *http.Client) (*http.Response, error) {
 	// create request
-	path := strings.Join([]string{url, contract.Path}, "")
-	req, err := http.NewRequest(strings.ToUpper(contract.Method), path, strings.NewReader(contract.Body))
+	uri := strings.Join([]string{url, contract.Path}, "")
+	req, err := http.NewRequest(strings.ToUpper(contract.Method), uri, strings.NewReader(contract.Body))
 	if err != nil {
 		return nil, fmt.Errorf("could not create http request: %v", err)
 	}
@@ -206,7 +239,7 @@ func validateResponseBody(contract Contract, body []byte) error {
 	if len(contract.ExpectedResponses) == 0 {
 		return nil
 	}
-	
+
 	for _, r := range contract.ExpectedResponses {
 		// check if it is a regexp
 		if strings.HasPrefix(r, "r/") {
@@ -221,7 +254,7 @@ func validateResponseBody(contract Contract, body []byte) error {
 			return fmt.Errorf("expected response not found in the body")
 		}
 	}
-	
+
 	return nil
 }
 
@@ -238,4 +271,20 @@ func validateHeaders(contract Contract, resp *http.Response) error {
 	}
 
 	return nil
+}
+
+func unmarshal(filename string, in []byte, out interface{}) error {
+	var unmarshalError error
+
+	ext := strings.Trim(path.Ext(filename), ".")
+	switch ext {
+	case "yaml":
+		fallthrough
+	case "yml":
+		unmarshalError = yaml.Unmarshal(in, out)
+	default:
+		unmarshalError = json.Unmarshal(in, out)
+	}
+
+	return unmarshalError
 }
