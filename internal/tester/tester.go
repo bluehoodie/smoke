@@ -2,11 +2,15 @@ package tester
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
+	"github.com/pkg/errors"
+	"gopkg.in/yaml.v2"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"os"
+	"path"
 	"regexp"
 	"strings"
 
@@ -50,7 +54,23 @@ type Test struct {
 	Contracts []Contract `json:"contracts" yaml:"contracts"`
 }
 
-func (t *Test) Init() {
+func NewTest(inputFile string) (*Test, error) {
+	data, err := ioutil.ReadFile(inputFile)
+	if err != nil {
+		return nil, errors.Wrapf(err, "could not read test file %v", inputFile)
+	}
+
+	t := Test{}
+	if err := unmarshal(inputFile, data, &t); err != nil {
+		return nil, errors.Wrapf(err, "could not unmarshal test data", inputFile)
+	}
+
+	t.init()
+
+	return &t, nil
+}
+
+func (t *Test) init() {
 	if t == nil || len(t.Contracts) == 0 {
 		return
 	}
@@ -71,7 +91,7 @@ type Runner struct {
 
 	client *http.Client
 
-	test Test
+	test *Test
 	url  string
 }
 
@@ -96,7 +116,7 @@ func WithHTTPClient(client *http.Client) Option {
 }
 
 // NewRunner returns a *Runner for a given url and Test.
-func NewRunner(url string, test Test, opts ...Option) *Runner {
+func NewRunner(url string, test *Test, opts ...Option) *Runner {
 	runner := &Runner{
 		url:  url,
 		test: test,
@@ -251,4 +271,20 @@ func validateHeaders(contract Contract, resp *http.Response) error {
 	}
 
 	return nil
+}
+
+func unmarshal(filename string, in []byte, out interface{}) error {
+	var unmarshalError error
+
+	ext := strings.Trim(path.Ext(filename), ".")
+	switch ext {
+	case "yaml":
+		fallthrough
+	case "yml":
+		unmarshalError = yaml.Unmarshal(in, out)
+	default:
+		unmarshalError = json.Unmarshal(in, out)
+	}
+
+	return unmarshalError
 }
