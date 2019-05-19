@@ -96,7 +96,7 @@ func parseOutputs(runner *Runner, contract *Contract, body []byte) (err error) {
 		if len(s) > 1 {
 			switch strings.ToLower(s[0]) {
 			case "json":
-				result, err = parseJson(value, s[1:], body)
+				result, err = parseJSON(value, s[1:], body)
 				if err != nil {
 					return
 				}
@@ -109,7 +109,7 @@ func parseOutputs(runner *Runner, contract *Contract, body []byte) (err error) {
 	return nil
 }
 
-func parseJson(format string, fields []string, body []byte) (value string, err error) {
+func parseJSON(format string, fields []string, body []byte) (value string, err error) {
 	if body == nil || fields == nil || len(fields) == 0 {
 		return "", fmt.Errorf("bad parameter")
 	}

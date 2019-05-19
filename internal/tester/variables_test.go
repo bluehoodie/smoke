@@ -179,7 +179,7 @@ var jsonParserTests = []struct {
 
 func TestJsonParser(t *testing.T) {
 	for _, tt := range jsonParserTests {
-		v, err := parseJson(tt.conf, tt.keys, []byte(tt.json))
+		v, err := parseJSON(tt.conf, tt.keys, []byte(tt.json))
 
 		assert.True(t, (err != nil) == tt.expectedError, tt.description)
 		assert.Equal(t, tt.expectedValue, v, tt.description)
