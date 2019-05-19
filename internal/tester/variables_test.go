@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var extractmaptt = []struct {
+var mapExtractTests = []struct {
 	m           map[string]interface{}
 	key         string
 	expected    interface{}
@@ -32,7 +32,7 @@ var extractmaptt = []struct {
 		expected:    nil,
 	},
 	{
-		description: "should send nil if there is no number formated string between [] on the key",
+		description: "should send nil if there is no number formatted string between [] on the key",
 		m:           make(map[string]interface{}),
 		key:         "param[abc]",
 		expected:    nil,
@@ -56,14 +56,14 @@ var extractmaptt = []struct {
 }
 
 func TestExtractValueFromJSONMap(t *testing.T) {
-	for _, tt := range extractmaptt {
+	for _, tt := range mapExtractTests {
 		result := extractValueFromJSONMap(tt.key, tt.m)
 
 		assert.Equal(t, tt.expected, result, tt.description)
 	}
 }
 
-var jsonParsertt = []struct {
+var jsonParserTests = []struct {
 	json          string
 	conf          string
 	keys          []string
@@ -178,15 +178,15 @@ var jsonParsertt = []struct {
 }
 
 func TestJsonParser(t *testing.T) {
-	for _, tt := range jsonParsertt {
-		v, err := jsonParser(tt.conf, tt.keys, []byte(tt.json))
+	for _, tt := range jsonParserTests {
+		v, err := parseJson(tt.conf, tt.keys, []byte(tt.json))
 
 		assert.True(t, (err != nil) == tt.expectedError, tt.description)
 		assert.Equal(t, tt.expectedValue, v, tt.description)
 	}
 }
 
-var extractarraytt = []struct {
+var arrayExtractTests = []struct {
 	key         string
 	arr         []interface{}
 	expected    interface{}
@@ -215,7 +215,7 @@ var extractarraytt = []struct {
 }
 
 func TestExtractValueFromJSONArray(t *testing.T) {
-	for _, tt := range extractarraytt {
+	for _, tt := range arrayExtractTests {
 		v := extractValueFromJSONArray(tt.key, tt.arr)
 
 		assert.Equal(t, tt.expected, v, tt.description)
@@ -263,7 +263,7 @@ var parseOtt = []struct {
 		runner:      &Runner{test: &Test{Globals: make(map[string]string)}},
 		body:        []byte(`OBVIOUSLY NOT A JSON`),
 		err:         true,
-		description: "should return an error if the body does not match with what is exected",
+		description: "should return an error if the body does not match with what is expected",
 	},
 }
 
@@ -282,7 +282,7 @@ func TestParseOutputs(t *testing.T) {
 
 }
 
-var replaceVartt = []struct {
+var variableReplacementTests = []struct {
 	s           string
 	contract    *Contract
 	runner      *Runner
@@ -342,7 +342,7 @@ var replaceVartt = []struct {
 }
 
 func TestReplaceVariables(t *testing.T) {
-	for _, tt := range replaceVartt {
+	for _, tt := range variableReplacementTests {
 		if tt.env != nil && len(tt.env) > 0 {
 			// Define env variables
 			for key, value := range tt.env {

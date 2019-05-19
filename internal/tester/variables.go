@@ -94,9 +94,9 @@ func parseOutputs(runner *Runner, contract *Contract, body []byte) (err error) {
 		s := strings.Split(value, ".")
 		var result string
 		if len(s) > 1 {
-			switch strings.ToUpper(s[0]) {
-			case "JSON":
-				result, err = jsonParser(value, s[1:], body)
+			switch strings.ToLower(s[0]) {
+			case "json":
+				result, err = parseJson(value, s[1:], body)
 				if err != nil {
 					return
 				}
@@ -109,23 +109,23 @@ func parseOutputs(runner *Runner, contract *Contract, body []byte) (err error) {
 	return nil
 }
 
-func jsonParser(format string, field []string, body []byte) (value string, err error) {
-	if body == nil || field == nil || len(field) == 0 {
-		return "", fmt.Errorf("Bad Parameter")
+func parseJson(format string, fields []string, body []byte) (value string, err error) {
+	if body == nil || fields == nil || len(fields) == 0 {
+		return "", fmt.Errorf("bad parameter")
 	}
 
 	begin := 0
 	var next interface{}
 
 	// If it begins by a [], we should extract the info from an array
-	if string(field[0][0]) == "[" {
+	if string(fields[0][0]) == "[" {
 		var arr []interface{}
 		err = json.Unmarshal(body, &arr)
 		if err != nil {
 			return
 		}
-		v := extractValueFromJSONArray(field[begin], arr)
-		if begin == len(field)-1 { // if it is the value expected
+		v := extractValueFromJSONArray(fields[begin], arr)
+		if begin == len(fields)-1 { // if it is the value expected
 			value = fmt.Sprint(v)
 			return
 		}
@@ -147,17 +147,17 @@ func jsonParser(format string, field []string, body []byte) (value string, err e
 	}
 
 	tmp := jsonMap
-	for i := begin; i < len(field); i++ {
-		if i == len(field)-1 {
-			if string(field[i][len(field[i])-1]) == "]" { // It's an array and field[i] is in the format "param[number]"
-				v := extractValueFromJSONMap(field[i], tmp)
+	for i := begin; i < len(fields); i++ {
+		if i == len(fields)-1 {
+			if string(fields[i][len(fields[i])-1]) == "]" { // It's an array and fields[i] is in the format "param[number]"
+				v := extractValueFromJSONMap(fields[i], tmp)
 				if v != nil {
 					value = fmt.Sprint(v)
 					return
 				}
 			}
 			// value
-			if val, ok := tmp[field[i]]; ok {
+			if val, ok := tmp[fields[i]]; ok {
 				value = fmt.Sprint(val)
 				return
 			}
@@ -167,10 +167,10 @@ func jsonParser(format string, field []string, body []byte) (value string, err e
 
 		var o interface{}
 
-		if string(field[i][len(field[i])-1]) == "]" { // It's an array and field[i] is in the format "param[number]"
-			o = extractValueFromJSONMap(field[i], tmp)
+		if string(fields[i][len(fields[i])-1]) == "]" { // It's an array and fields[i] is in the format "param[number]"
+			o = extractValueFromJSONMap(fields[i], tmp)
 		} else {
-			if val, ok := tmp[field[i]]; ok {
+			if val, ok := tmp[fields[i]]; ok {
 				o = val
 			} else {
 				return "", fmt.Errorf("value not present in the json object %s", format)
@@ -178,7 +178,6 @@ func jsonParser(format string, field []string, body []byte) (value string, err e
 		}
 
 		tmp = o.(map[string]interface{})
-
 	}
 
 	return

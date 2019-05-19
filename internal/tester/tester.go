@@ -53,6 +53,7 @@ type Test struct {
 	Contracts []Contract        `json:"contracts" yaml:"contracts"`
 }
 
+// NewTest returns an initialized *Test and any error encountered along the way
 func NewTest(inputFile string) (*Test, error) {
 	data, err := ioutil.ReadFile(inputFile)
 	if err != nil {
@@ -204,8 +205,8 @@ func failure(out io.Writer, name, format string, args ...interface{}) {
 
 func createAndSendRequest(contract Contract, url string, client *http.Client) (*http.Response, error) {
 	// create request
-	path := strings.Join([]string{url, contract.Path}, "")
-	req, err := http.NewRequest(strings.ToUpper(contract.Method), path, strings.NewReader(contract.Body))
+	uri := strings.Join([]string{url, contract.Path}, "")
+	req, err := http.NewRequest(strings.ToUpper(contract.Method), uri, strings.NewReader(contract.Body))
 	if err != nil {
 		return nil, fmt.Errorf("could not create http request: %v", err)
 	}
