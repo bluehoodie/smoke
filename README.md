@@ -13,10 +13,6 @@ The most convenient way of running this code, especially in a CI environment, is
 
 `docker run -v {YOUR_TESTFILE_LOCATION}:/test bluehoodie/smoke -f /test/{YOUR_TESTFILE} -u http://{YOUR_URL}`
 
-Otherwise, it can be installed locally by running 
-
-`go get github.com/bluehoodie/smoke`
-
 ### Usage
 
 ``` 
@@ -39,7 +35,7 @@ Help Options:
 The test file can be either a JSON or YAML map with the following elements:
 
 - `globals`: a map of of keys to values representing variables which can be accessed in all test cases
-- `contracts`: a list of user-defined contracts reprenting each test case
+- `contracts`: a list of user-defined contracts representing each test case
 
 The structure of a contract element is a map with the following elements:
 
@@ -50,7 +46,8 @@ The structure of a contract element is a map with the following elements:
 - `headers`: map of header values to add to the http request (optional)
 - `locals`: map of variables specific to this test case. will override the global values
 - `http_code_is`: integer representing the expected http code in the result
-- `response_body_contains`: string representing an expected value within the resulting response body (Can be a regexp begining by r/ example "r/[0-9]*" )
+- `response_body_contains`: string representing an expected value within the resulting response body (Can be a regexp beginning by r/ example "r/[0-9]*" )
+- `response_headers_contain`: map representing expected keys and values in response headers. If only the 
 
 See the `smoke_test.json` and `smoke_test.yaml` files for examples. 
 

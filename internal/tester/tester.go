@@ -4,8 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/pkg/errors"
-	"gopkg.in/yaml.v2"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -15,6 +13,8 @@ import (
 	"strings"
 
 	"github.com/fatih/color"
+	"github.com/pkg/errors"
+	"gopkg.in/yaml.v2"
 )
 
 const (
@@ -28,8 +28,7 @@ var (
 	boldGreen = color.New(color.FgGreen, color.Bold)
 )
 
-// Contract represents the data for a single test case: the definition of the HTTP call
-// and the expected result
+// Contract represents the data for a single test case: the definition of the HTTP call and the expected result
 type Contract struct {
 	Name    string            `json:"name" yaml:"name"`
 	Path    string            `json:"path" yaml:"path"`
@@ -44,7 +43,7 @@ type Contract struct {
 	ExpectedHTTPCode     int               `json:"http_code_is" yaml:"http_code_is"`
 	ExpectedResponseBody string            `json:"response_body_contains" yaml:"response_body_contains"`
 	ExpectedResponses    []string          `json:"response_contains" yaml:"response_contains"`
-	ExpectedHeaders      map[string]string `json:"response_headers_is" yaml:"response_headers_is"`
+	ExpectedHeaders      map[string]string `json:"response_headers_contain" yaml:"response_headers_contain"`
 }
 
 // Test represents the data for a full test suite
@@ -61,7 +60,7 @@ func NewTest(inputFile string) (*Test, error) {
 	}
 
 	t := Test{}
-	if err := unmarshal(inputFile, data, &t); err != nil {
+	if err := unmarshalInputFile(inputFile, data, &t); err != nil {
 		return nil, errors.Wrap(err, "could not unmarshal test data")
 	}
 
@@ -155,44 +154,47 @@ func (runner *Runner) Run() bool {
 	return true
 }
 
-func (runner *Runner) validateContract(contract Contract) (err error) {
-	if err = parseVariables(runner, &contract); err != nil {
-		return
+func (runner *Runner) validateContract(contract Contract) error {
+	if err := parseVariables(runner, &contract); err != nil {
+		return err
 	}
 
 	var resp *http.Response
-	resp, err = createAndSendRequest(contract, runner.url, runner.client)
+	resp, err := createAndSendRequest(contract, runner.url, runner.client)
 	if err != nil {
-		return
+		return err
 	}
 
 	if err = validateHTTPCode(contract, resp); err != nil {
-		return
+		return err
 	}
 
 	if len(contract.ExpectedHeaders) > 0 {
 		if err = validateHeaders(contract, resp); err != nil {
-			return
-		}
-	}
-
-	if len(contract.ExpectedResponses) > 0 || (contract.Outputs != nil && len(contract.Outputs) > 0) {
-		body, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			return err
-		}
-		defer resp.Body.Close()
-
-		if err = validateResponseBody(contract, body); err != nil {
-			return err
-		}
-
-		if err = parseOutputs(runner, &contract, body); err != nil {
 			return err
 		}
 	}
 
-	return
+	// if body does not need to be validated, return now
+	if len(contract.ExpectedResponses) == 0 && (contract.Outputs == nil || len(contract.Outputs) == 0) {
+		return nil
+	}
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if err = validateResponseBody(contract, body); err != nil {
+		return err
+	}
+
+	if err = parseOutputs(runner, &contract, body); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func success(out io.Writer, name string) {
@@ -261,19 +263,30 @@ func validateResponseBody(contract Contract, body []byte) error {
 func validateHeaders(contract Contract, resp *http.Response) error {
 	for k, v := range contract.ExpectedHeaders {
 		if val, ok := resp.Header[k]; ok && len(val) > 0 {
-			if v != val[0] {
+			if v == "" {
+				continue
+			}
+
+			if strings.HasPrefix(v, "r/") {
+				expectedRegexp := v[2:]
+				re, err := regexp.Compile(expectedRegexp)
+				if err == nil {
+					if !re.MatchString(val[0]) {
+						return fmt.Errorf("regular expression did not find any matches in the response body")
+					}
+				}
+			} else if v != val[0] {
 				return fmt.Errorf("expected header %s value %s got %s ", k, v, val[0])
 			}
 		} else {
 			return fmt.Errorf("expected header %s not found in the response", k)
 		}
-
 	}
 
 	return nil
 }
 
-func unmarshal(filename string, in []byte, out interface{}) error {
+func unmarshalInputFile(filename string, in []byte, out interface{}) error {
 	var unmarshalError error
 
 	ext := strings.Trim(path.Ext(filename), ".")
