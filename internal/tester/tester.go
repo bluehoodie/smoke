@@ -74,12 +74,12 @@ func (t *Test) init() {
 		return
 	}
 
-	for _, c := range t.Contracts {
-		if c.ExpectedResponseBody == "" {
+	for i := range t.Contracts {
+		if t.Contracts[i].ExpectedResponseBody == "" {
 			continue
 		}
 
-		c.ExpectedResponses = append(c.ExpectedResponses, c.ExpectedResponseBody)
+		t.Contracts[i].ExpectedResponses = append(t.Contracts[i].ExpectedResponses, t.Contracts[i].ExpectedResponseBody)
 	}
 }
 
