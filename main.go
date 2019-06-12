@@ -22,10 +22,12 @@ var opts struct {
 func main() {
 	_, err := flags.Parse(&opts)
 	if err != nil {
-		if ferr, ok := err.(*flags.Error); ok && ferr.Type == flags.ErrHelp {
-			os.Exit(0)
+		ferr, ok := err.(*flags.Error)
+		
+		if !ok || (ok && ferr.Type != flags.ErrHelp) {
+			fmt.Fprintf(os.Stderr, err.Error())
 		}
-		fmt.Fprintf(os.Stderr, err.Error())
+
 		os.Exit(2)
 	}
 
