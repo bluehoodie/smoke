@@ -15,9 +15,9 @@ before_install:
   - docker pull bluehoodie/httpbin
   - docker run -d -p 8000:8000 --rm --name httpbin bluehoodie/httpbin
 before_script:
-  - GO111MODULE=on go test -race -v `go list ./... | grep -v -e /vendor/ -e /mock/`
+  - env GO111MODULE=on go test -race -v `go list ./... | grep -v -e /vendor/ -e /mock/`
 install:
-  - GO111MODULE=on go get github.com/bluehoodie/smoke
+  - env GO111MODULE=on go get github.com/bluehoodie/smoke
 script:
   - smoke -f $APPPATH/smoke_test.json -u http://localhost -p 8000 -v
   - smoke -f $APPPATH/smoke_test.yaml -u http://localhost -p 8000 -v
