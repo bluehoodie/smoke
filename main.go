@@ -20,7 +20,8 @@ var opts struct {
 }
 
 func main() {
-	_, err := flags.Parse(&opts)
+	flagParser := flags.NewParser(&opts, flags.HelpFlag | flags.PassDoubleDash)
+	_, err := flagParser.Parse()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, err.Error())
 		os.Exit(2)
