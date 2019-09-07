@@ -7,7 +7,7 @@ addons:
 services:
   - docker
 go:
-  - "1.10"
+  - "1.13"
 env:
   - PATH=$HOME/gopath/bin:$PATH APPPATH=$HOME/gopath/src/github.com/bluehoodie/smoke/ ENVTOKEN=token235
 before_install:
