@@ -7,7 +7,7 @@ addons:
 services:
   - docker
 go:
-  - "1.10"
+  - "1.13"
 env:
   - PATH=$HOME/gopath/bin:$PATH APPPATH=$HOME/gopath/src/github.com/bluehoodie/smoke/ ENVTOKEN=token235
 before_install:
@@ -15,15 +15,9 @@ before_install:
   - docker pull bluehoodie/httpbin
   - docker run -d -p 8000:8000 --rm --name httpbin bluehoodie/httpbin
 before_script:
-   # install dependencies
-  - go get -u github.com/golang/dep/cmd/dep
-  - go get -u golang.org/x/lint/golint
-  - dep ensure
-  - go test -race -v `go list ./... | grep -v -e /vendor/ -e /mock/`
-  - go list ./... | grep -v /vendor/ | xargs -L1 golint -set_exit_status
-  - go vet `go list ./... | grep -v /vendor/`
+  - env GO111MODULE=on go test -race -v `go list ./... | grep -v -e /vendor/ -e /mock/`
 install:
-  - go get github.com/bluehoodie/smoke
+  - env GO111MODULE=on go get github.com/bluehoodie/smoke
 script:
   - smoke -f $APPPATH/smoke_test.json -u http://localhost -p 8000 -v
   - smoke -f $APPPATH/smoke_test.yaml -u http://localhost -p 8000 -v
