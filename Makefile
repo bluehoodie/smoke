@@ -1,18 +1,15 @@
-.PHONY: install dep container publish binary httpbin-container httpbin-publish test
+.PHONY: install container publish binary httpbin-container httpbin-publish test
 
 install:
 	go build -o ${GOPATH}/bin/smoke main.go
 
-dep:
-	dep ensure
-
-container: dep
+container:
 	docker build -t bluehoodie/smoke .
 
 publish: container
 	docker push bluehoodie/smoke
 
-binary: dep
+binary:
 	goreleaser --rm-dist
 
 httpbin-container:
